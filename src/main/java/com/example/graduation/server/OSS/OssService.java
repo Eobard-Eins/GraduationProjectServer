@@ -1,7 +1,5 @@
 package com.example.graduation.server.OSS;
 
-import com.tuanzi.config.AliyunConfig;
-import com.tuanzi.vo.FileUploadResult;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.*;
 import org.apache.commons.lang3.RandomUtils;

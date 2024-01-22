@@ -40,14 +40,4 @@ public class UserController {
         return userService.sendCaptcha(phone);
     }
 
-    @PutMapping("/setPassword")
-    public result<Boolean> setPassword(String phone, String password){
-        return userService.setPassword(phone, password);
-    }
-
-    @PutMapping("/setNameAndAvatar")
-    public result<Boolean> setNameAndAvatar(String phone){
-        //TODO: 设置头像和用户名，调用两个函数分别设置
-        return new result(true);
-    }
 }
