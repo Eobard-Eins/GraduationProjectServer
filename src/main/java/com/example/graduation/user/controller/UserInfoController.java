@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/userInfo")
 /**
- * 用户信息相关
+ * @desc 用户信息相关
  */
 public class UserInfoController {
     @Autowired

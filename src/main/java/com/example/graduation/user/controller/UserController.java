@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/userLogin")
 /**
- * 用户登录相关
+ * @desc 用户登录相关
  */
 public class UserController {
     @Autowired

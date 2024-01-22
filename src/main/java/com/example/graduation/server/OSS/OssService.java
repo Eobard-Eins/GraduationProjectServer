@@ -13,7 +13,7 @@ import java.io.*;
 import java.util.List;
 
 /**
- * Oss操作相关，用于操作文件存储服务
+ * @desc Oss操作相关，用于操作文件存储服务
  */
 @Service
 public class OssService {
@@ -22,8 +22,9 @@ public class OssService {
             ".jpeg", ".gif", ".png"};
     @Autowired
     private OSS ossClient;
+
     @Autowired
-    private AliyunConfig aliyunConfig;
+    private OssConfig ossConfig;
 
     /**
      * @author 团子
@@ -51,7 +52,7 @@ public class OssService {
         String filePath = getFilePath(fileName);
         // 上传到阿里云
         try {
-            ossClient.putObject(aliyunConfig.getBucketName(), filePath, new
+            ossClient.putObject(ossConfig.getBucketName(), filePath, new
                     ByteArrayInputStream(uploadFile.getBytes()));
         } catch (Exception e) {
             e.printStackTrace();
@@ -61,7 +62,7 @@ public class OssService {
         }
         fileUploadResult.setStatus("done");
         fileUploadResult.setResponse("success");
-        fileUploadResult.setName(this.aliyunConfig.getUrlPrefix() + filePath);
+        fileUploadResult.setName(this.ossConfig.getUrlPrefix() + filePath);
         fileUploadResult.setUid(String.valueOf(System.currentTimeMillis()));
         return fileUploadResult;
     }
@@ -89,7 +90,7 @@ public class OssService {
         // 设置最大个数。
         final int maxKeys = 200;
         // 列举文件。
-        ObjectListing objectListing = ossClient.listObjects(new ListObjectsRequest(aliyunConfig.getBucketName()).withMaxKeys(maxKeys));
+        ObjectListing objectListing = ossClient.listObjects(new ListObjectsRequest(ossConfig.getBucketName()).withMaxKeys(maxKeys));
         List<OSSObjectSummary> sums = objectListing.getObjectSummaries();
         return sums;
     }
@@ -101,7 +102,7 @@ public class OssService {
      */
     public FileUploadResult delete(String objectName) {
         // 根据BucketName,objectName删除文件
-        ossClient.deleteObject(aliyunConfig.getBucketName(), objectName);
+        ossClient.deleteObject(ossConfig.getBucketName(), objectName);
         FileUploadResult fileUploadResult = new FileUploadResult();
         fileUploadResult.setName(objectName);
         fileUploadResult.setStatus("removed");
@@ -116,7 +117,7 @@ public class OssService {
      */
     public void exportOssFile(OutputStream os, String objectName) throws IOException {
         // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。
-        OSSObject ossObject = ossClient.getObject(aliyunConfig.getBucketName(), objectName);
+        OSSObject ossObject = ossClient.getObject(ossConfig.getBucketName(), objectName);
         // 读取文件内容。
         BufferedInputStream in = new BufferedInputStream(ossObject.getObjectContent());
         BufferedOutputStream out = new BufferedOutputStream(os);
