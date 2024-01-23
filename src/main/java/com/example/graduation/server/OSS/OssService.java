@@ -27,9 +27,7 @@ public class OssService {
     private OssConfig ossConfig;
 
     /**
-     * @author 团子
      * @desc 文件上传
-     * @date 2019-07-31 11:31
      */
     public FileUploadResult upload(MultipartFile uploadFile) {
         // 校验图片格式
@@ -68,9 +66,7 @@ public class OssService {
     }
 
     /**
-     * @author 团子
-     * @desc 生成路径以及文件名 例如：//images/2019/08/10/15564277465972939.jpg
-     * @date 2019-07-31 11:31
+     * @desc 生成路径以及文件名
      */
     private String getFilePath(String sourceFileName) {
         DateTime dateTime = new DateTime();
@@ -82,9 +78,7 @@ public class OssService {
     }
 
     /**
-     * @author 团子
      * @desc 查看文件列表
-     * @date 2019-07-31 11:31
      */
     public List<OSSObjectSummary> list() {
         // 设置最大个数。
@@ -96,9 +90,7 @@ public class OssService {
     }
 
     /**
-     * @author 团子
      * @desc 删除文件
-     * @date 2019-07-31 11:31
      */
     public FileUploadResult delete(String objectName) {
         // 根据BucketName,objectName删除文件
@@ -111,9 +103,7 @@ public class OssService {
     }
 
     /**
-     * @author 团子
      * @desc 下载文件
-     * @date 2019-07-31 11:31
      */
     public void exportOssFile(OutputStream os, String objectName) throws IOException {
         // ossObject包含文件所在的存储空间名称、文件名称、文件元信息以及一个输入流。

@@ -8,13 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Builder
 @Entity
 @Table(name = "users")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private long id;
 
     @Column(name = "phone")
     private String phone;
@@ -38,6 +39,13 @@ public class User {
     private Double longitude;
     @Column(name = "latitude")
     private Double latitude;
+
+    //积分
+    @Column(name = "point")
+    private Double point;
+
+    @Column(name = "registered")
+    private boolean registered;
 
 //    //最后登录时间
 //    @Column(name = "last_login_time")

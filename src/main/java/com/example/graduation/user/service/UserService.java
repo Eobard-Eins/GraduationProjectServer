@@ -2,10 +2,12 @@ package com.example.graduation.user.service;
 
 import com.example.graduation.user.model.User;
 import com.example.graduation.user.repository.UserRepository;
-import com.example.graduation.utils.result;
+import com.example.graduation.utils.Res;
 import com.example.graduation.utils.status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 /**
@@ -16,30 +18,35 @@ public class UserService {
     private UserRepository userRepository;
 
 
-    public result<Boolean> loginWithPassword(String phone, String password) {
+    public Res<User> loginWithPassword(String phone, String password) {
         try{
-            if(!userRepository.existsUserByPhone(phone)) return new result<>(status.userNotExist,false);
-            User u=userRepository.getUserByPhone(phone);
-            if(u.getPassword().equals(password)){
-                return new result<>(true);
+            Optional<User> u=userRepository.findById(phone);
+            if(u.isEmpty()) return Res.Error(status.userNotExist);
+            if(u.get().getPassword().equals(password)){
+                return Res.Sucess(u.get());
             }else{
-                return new result<>(status.passwordError,false);
+                return Res.Error(status.passwordError);
             }
         }catch (Exception e) {
-            return new result<>(status.netError, false);
+            return Res.Error(status.netError);
         }
     }
 
-    public result<Boolean> loginWithCaptcha(String phone, String captcha) {
+    //TODO: 验证码最后写
+    public Res<User> loginWithCaptcha(String phone, String captcha) {
+        return Res.Error(status.captchaError);
     }
 
-    public result<Boolean> loginWithCaptchaByUserExist(String phone, String captcha) {
+    public Res<User> loginWithCaptchaByUserExist(String phone, String captcha) {
+        return Res.Error(status.captchaError);
     }
 
-    public result<Boolean> loginWithCaptchaByUserNotExist(String phone, String captcha) {
+    public Res<Boolean> loginWithCaptchaByUserNotExist(String phone, String captcha) {
+        return Res.Error(status.captchaError);
     }
 
-    public result<Boolean> sendCaptcha(String phone) {
+    public Res<Boolean> sendCaptcha(String phone) {
+        return Res.Error(status.captchaError);
     }
 
 
