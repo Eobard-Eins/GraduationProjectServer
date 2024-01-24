@@ -16,28 +16,33 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/test")
+    public String test(){
+        return "OK";
+    }
+
     @GetMapping("/loginWithPassword")
-    public Res<User> loginWithPassword(String phone, String password){
+    public Res<User> loginWithPassword(@RequestParam("phone") String phone, @RequestParam("password") String password){
         return userService.loginWithPassword(phone, password);
     }
 
     @GetMapping("/loginWithCaptcha")
-    public Res<User> loginWithCaptcha(String phone, String captcha){
+    public Res<User> loginWithCaptcha(@RequestParam("phone") String phone, @RequestParam("captcha") String captcha){
         return userService.loginWithCaptcha(phone, captcha);
     }
 
     @GetMapping("/loginWithCaptchaByUserExist")
-    public Res<User> loginWithCaptchaByUserExist(String phone, String captcha){
+    public Res<User> loginWithCaptchaByUserExist(@RequestParam("phone") String phone, @RequestParam("captcha") String captcha){
         return userService.loginWithCaptchaByUserExist(phone, captcha);
     }
 
     @PostMapping("/loginWithCaptchaByUserNotExist")
-    public Res<Boolean> loginWithCaptchaByUserNotExist(String phone, String captcha){
+    public Res<Boolean> loginWithCaptchaByUserNotExist(@RequestParam("phone") String phone, @RequestParam("captcha") String captcha){
         return userService.loginWithCaptchaByUserNotExist(phone, captcha);
     }
 
     @GetMapping("/sendCaptcha")
-    public Res<Boolean> sendCaptcha(String phone){
+    public Res<Boolean> sendCaptcha(@RequestParam("phone") String phone){
         return userService.sendCaptcha(phone);
     }
 

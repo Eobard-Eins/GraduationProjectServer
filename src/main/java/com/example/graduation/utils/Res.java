@@ -18,9 +18,14 @@ public class Res<T> {
      * @desc 构造器Error，带有必填参数
      * @param statusCode
      */
-    public Res(int statusCode) {
+    public Res(Integer statusCode) {
         this.statusCode = statusCode;
         this.data = null;
+    }
+
+    public Res(Integer statusCode, T data) {
+        this.data = data;
+        this.statusCode = statusCode;
     }
 
 
@@ -35,7 +40,10 @@ public class Res<T> {
     public static <T> Res<T> Sucess(T data) {
         return new Res<>(data);
     }
-    public static <T> Res<T> Error(int statusCode) {
+    public static <T> Res<T> Sucess(Integer statusCode, T data) {
+        return new Res<>(statusCode, data);
+    }
+    public static <T> Res<T> Error(Integer statusCode) {
         return new Res<>(statusCode);
     }
 }

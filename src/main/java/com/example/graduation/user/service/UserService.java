@@ -22,7 +22,7 @@ public class UserService {
         try{
             Optional<User> u=userRepository.findById(phone);
             if(u.isEmpty()) return Res.Error(status.userNotExist);
-            if(u.get().getPassword().equals(password)){
+            if(password.equals(u.get().getPassword())){
                 return Res.Sucess(u.get());
             }else{
                 return Res.Error(status.passwordError);
