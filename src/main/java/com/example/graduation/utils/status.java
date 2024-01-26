@@ -23,11 +23,14 @@ public class status {
     static public int setLongitudeAndLatitudeError=1203;//通信数据库设置经纬度时出现错误
     static public int setPointError=1204;//通信数据库设置积分时出现错误
     static public int setRegisteredError=1204;//通信数据库设置注册状态时出现错误
+    static public int setAvatarError=1205;//通信数据库设置头像时出现错误
 
     /**
      * 网络
      */
     static public int netError=1300;//网络错误
+    static public int ossError=1301;//Oss服务器错误
+    static public int infoMiss=1302;//传输信息缺失
 
     //不存在状态码
     static public int noStatusCode=0000;//其他

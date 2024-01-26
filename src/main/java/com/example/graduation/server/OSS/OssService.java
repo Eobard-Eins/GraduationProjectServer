@@ -42,7 +42,7 @@ public class OssService {
         //封装Result对象，并且将文件的byte数组放置到result对象中
         FileUploadResult fileUploadResult = new FileUploadResult();
         if (!isLegal) {
-            fileUploadResult.setStatus("error");
+            fileUploadResult.setStatus(FileStatus.error);
             return fileUploadResult;
         }
         //文件新路径
@@ -55,10 +55,10 @@ public class OssService {
         } catch (Exception e) {
             e.printStackTrace();
             //上传失败
-            fileUploadResult.setStatus("error");
+            fileUploadResult.setStatus(FileStatus.error);
             return fileUploadResult;
         }
-        fileUploadResult.setStatus("done");
+        fileUploadResult.setStatus(FileStatus.done);
         fileUploadResult.setResponse("success");
         fileUploadResult.setName(this.ossConfig.getUrlPrefix() + filePath);
         fileUploadResult.setUid(String.valueOf(System.currentTimeMillis()));
@@ -66,7 +66,7 @@ public class OssService {
     }
 
     /**
-     * @desc 生成路径以及文件名
+     * @desc 生成路径以及文件名，以时间作为唯一命名，但存在oss服务器内无法精准确定哪些是某个用户所存资源的问题
      */
     private String getFilePath(String sourceFileName) {
         DateTime dateTime = new DateTime();
@@ -97,7 +97,7 @@ public class OssService {
         ossClient.deleteObject(ossConfig.getBucketName(), objectName);
         FileUploadResult fileUploadResult = new FileUploadResult();
         fileUploadResult.setName(objectName);
-        fileUploadResult.setStatus("removed");
+        fileUploadResult.setStatus(FileStatus.removed);
         fileUploadResult.setResponse("success");
         return fileUploadResult;
     }

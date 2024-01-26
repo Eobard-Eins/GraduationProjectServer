@@ -4,12 +4,14 @@ import com.example.graduation.user.model.User;
 import com.example.graduation.user.repository.UserRepository;
 import com.example.graduation.utils.Res;
 import com.example.graduation.utils.status;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
+@Transactional
 /**
  * @desc 用户登录相关
  */
@@ -28,25 +30,26 @@ public class UserService {
                 return Res.Error(status.passwordError);
             }
         }catch (Exception e) {
+            System.out.println(e);
             return Res.Error(status.netError);
         }
     }
 
     //TODO: 验证码最后写
     public Res<User> loginWithCaptcha(String phone, String captcha) {
-        return Res.Error(status.captchaError);
+        return Res.Sucess(new User());
     }
 
     public Res<User> loginWithCaptchaByUserExist(String phone, String captcha) {
-        return Res.Error(status.captchaError);
+        return Res.Sucess(new User());
     }
 
     public Res<Boolean> loginWithCaptchaByUserNotExist(String phone, String captcha) {
-        return Res.Error(status.captchaError);
+        return Res.Sucess(true);
     }
 
     public Res<Boolean> sendCaptcha(String phone) {
-        return Res.Error(status.captchaError);
+        return Res.Sucess(true);
     }
 
 

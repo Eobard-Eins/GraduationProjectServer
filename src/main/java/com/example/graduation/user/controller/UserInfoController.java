@@ -1,11 +1,15 @@
 package com.example.graduation.user.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.example.graduation.user.model.User;
 import com.example.graduation.user.service.UserInfoService;
 import com.example.graduation.utils.Res;
+import com.example.graduation.utils.status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Map;
 
 @CrossOrigin("*")
 @RestController
@@ -18,40 +22,52 @@ public class UserInfoController {
     private UserInfoService userInfoService;
 
     @PutMapping("/setPassword")
-    public Res<Boolean> setPassword(String phone, String password){
-        return userInfoService.setPassword(phone, password);
+    public Res<Boolean> setPassword(@RequestBody String info){
+        Map json= JSONObject.parseObject(info, Map.class);;
+        if(json.containsKey("phone")&&json.containsKey("password"))
+           return userInfoService.setPassword((String) json.get("phone"), (String) json.get("password"));
+        return Res.Error(status.infoMiss);
     }
 
-    @PutMapping("/setNameAndAvatar")
-    public Res<Boolean> setNameAndAvatar(@RequestParam("file") MultipartFile uploadFile, String phone, String username){
-        //TODO: 设置头像和用户名，调用两个函数分别设置
-        return userInfoService.setNameAndAvatar(phone, username, uploadFile);
-    }
+//    @PostMapping("/setNameAndAvatar")
+//    public Res<Boolean> setNameAndAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String phone, @RequestParam("un") String username){
+//        //TODO: 设置头像和用户名，调用两个函数分别设置
+//        return userInfoService.setNameAndAvatar(phone, username, uploadFile);
+//    }
 
     @PutMapping("/setName")
-    public Res<Boolean> setName(String phone, String username) {
-        return userInfoService.setName(phone, username);
+    public Res<Boolean> setName(@RequestBody String info) {
+        Map json= JSONObject.parseObject(info, Map.class);;
+        if(json.containsKey("phone")&&json.containsKey("username"))
+            return userInfoService.setName((String) json.get("phone"), (String) json.get("username"));
+        return Res.Error(status.infoMiss);
     }
 
-    @PutMapping("/setAvatar")
-    public Res<Boolean> setAvatar(String phone, MultipartFile uploadFile){
+    @PostMapping("/setAvatar")
+    public Res<Boolean> setAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String phone){
         return userInfoService.setAvatar(phone, uploadFile);
     }
 
-    @PutMapping("/setLongitudeAndLatitude")
-    public Res<Boolean> setLongitudeAndLatitude(String phone, Double longitude, Double latitude){
-        return userInfoService.setLongitudeAndLatitude(phone, longitude, latitude);
-    }
+//    @PutMapping("/setLongitudeAndLatitude")
+//    public Res<Boolean> setLongitudeAndLatitude(String phone, Double longitude, Double latitude){
+//        return userInfoService.setLongitudeAndLatitude(phone, longitude, latitude);
+//    }
 
     @PutMapping("/setPoint")
-    public Res<Boolean> setPoint(String phone, Double point){
-        return userInfoService.setPoint(phone, point);
+    public Res<Boolean> setPoint(@RequestBody String info){
+        Map json= JSONObject.parseObject(info, Map.class);;
+        if(json.containsKey("phone")&&json.containsKey("point"))
+            return userInfoService.setPoint((String) json.get("phone"), (Double) json.get("point"));
+        return Res.Error(status.infoMiss);
     }
 
 
     @PutMapping("/setRegistered")
-    public Res<Boolean> setRegistered(String phone, boolean registered){
-        return userInfoService.setRegistered(phone, registered);
+    public Res<Boolean> setRegistered(@RequestBody String info){
+        Map json= JSONObject.parseObject(info, Map.class);;
+        if(json.containsKey("phone")&&json.containsKey("registered"))
+            return userInfoService.setRegistered((String) json.get("phone"), (Boolean) json.get("registered"));
+        return Res.Error(status.infoMiss);
     }
 
     /**
@@ -60,7 +76,7 @@ public class UserInfoController {
      * @return 用户信息实体类对象
      */
     @GetMapping("/getInfo")
-    public Res<User> getInfo(String phone){
+    public Res<User> getInfo(@RequestParam("phone") String phone){
         return userInfoService.getInfo(phone);
     }
 
