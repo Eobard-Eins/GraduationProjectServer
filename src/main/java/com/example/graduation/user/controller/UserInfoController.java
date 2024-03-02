@@ -24,40 +24,40 @@ public class UserInfoController {
     @PutMapping("/setPassword")
     public Res<Boolean> setPassword(@RequestBody String info){
         Map json= JSONObject.parseObject(info, Map.class);;
-        if(json.containsKey("phone")&&json.containsKey("password"))
-           return userInfoService.setPassword((String) json.get("phone"), (String) json.get("password"));
+        if(json.containsKey("mailAddress")&&json.containsKey("password"))
+           return userInfoService.setPassword((String) json.get("mailAddress"), (String) json.get("password"));
         return Res.Error(status.infoMiss);
     }
 
 //    @PostMapping("/setNameAndAvatar")
-//    public Res<Boolean> setNameAndAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String phone, @RequestParam("un") String username){
+//    public Res<Boolean> setNameAndAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String mailAddress, @RequestParam("un") String username){
 //        //TODO: 设置头像和用户名，调用两个函数分别设置
-//        return userInfoService.setNameAndAvatar(phone, username, uploadFile);
+//        return userInfoService.setNameAndAvatar(mailAddress, username, uploadFile);
 //    }
 
     @PutMapping("/setName")
     public Res<Boolean> setName(@RequestBody String info) {
         Map json= JSONObject.parseObject(info, Map.class);;
-        if(json.containsKey("phone")&&json.containsKey("username"))
-            return userInfoService.setName((String) json.get("phone"), (String) json.get("username"));
+        if(json.containsKey("mailAddress")&&json.containsKey("username"))
+            return userInfoService.setName((String) json.get("mailAddress"), (String) json.get("username"));
         return Res.Error(status.infoMiss);
     }
 
     @PostMapping("/setAvatar")
-    public Res<Boolean> setAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String phone){
-        return userInfoService.setAvatar(phone, uploadFile);
+    public Res<Boolean> setAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String mailAddress){
+        return userInfoService.setAvatar(mailAddress, uploadFile);
     }
 
 //    @PutMapping("/setLongitudeAndLatitude")
-//    public Res<Boolean> setLongitudeAndLatitude(String phone, Double longitude, Double latitude){
-//        return userInfoService.setLongitudeAndLatitude(phone, longitude, latitude);
+//    public Res<Boolean> setLongitudeAndLatitude(String mailAddress, Double longitude, Double latitude){
+//        return userInfoService.setLongitudeAndLatitude(mailAddress, longitude, latitude);
 //    }
 
     @PutMapping("/setPoint")
     public Res<Boolean> setPoint(@RequestBody String info){
         Map json= JSONObject.parseObject(info, Map.class);;
-        if(json.containsKey("phone")&&json.containsKey("point"))
-            return userInfoService.setPoint((String) json.get("phone"), (Double) json.get("point"));
+        if(json.containsKey("mailAddress")&&json.containsKey("point"))
+            return userInfoService.setPoint((String) json.get("mailAddress"), (Double) json.get("point"));
         return Res.Error(status.infoMiss);
     }
 
@@ -65,19 +65,19 @@ public class UserInfoController {
     @PutMapping("/setRegistered")
     public Res<Boolean> setRegistered(@RequestBody String info){
         Map json= JSONObject.parseObject(info, Map.class);;
-        if(json.containsKey("phone")&&json.containsKey("registered"))
-            return userInfoService.setRegistered((String) json.get("phone"), (Boolean) json.get("registered"));
+        if(json.containsKey("mailAddress")&&json.containsKey("registered"))
+            return userInfoService.setRegistered((String) json.get("mailAddress"), (Boolean) json.get("registered"));
         return Res.Error(status.infoMiss);
     }
 
     /**
      * 获取用户信息
-     * @param phone 手机号码
+     * @param mailAddress 手机号码
      * @return 用户信息实体类对象
      */
     @GetMapping("/getInfo")
-    public Res<User> getInfo(@RequestParam("phone") String phone){
-        return userInfoService.getInfo(phone);
+    public Res<User> getInfo(@RequestParam("mailAddress") String mailAddress){
+        return userInfoService.getInfo(mailAddress);
     }
 
 }

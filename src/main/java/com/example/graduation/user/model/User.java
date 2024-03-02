@@ -17,8 +17,8 @@ public class User {
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    private long id;
 
-    @Column(name = "phone")
-    private String phone;
+    @Column(name = "mailAddress")
+    private String mailAddress;
 
     @Column(name = "username")
     private String username;
@@ -34,12 +34,6 @@ public class User {
     @Column(name = "avatar")
     private String avatar;
 
-    //经纬度
-    @Column(name = "longitude")
-    private Double longitude;
-    @Column(name = "latitude")
-    private Double latitude;
-
     //积分
     @Column(name = "point")
     private Double point;
@@ -50,4 +44,11 @@ public class User {
 //    //最后登录时间
 //    @Column(name = "last_login_time")
 //    private String lastLoginTime;
+    User(String email){
+        this.mailAddress=email;
+        this.username=email.substring(0, email.indexOf('@'));
+        this.avatar="eins-graduatin-oss.oss-cn-shenzhen.aliyuncs.com/default.jpg";
+        this.point=5.0;
+        this.registered=false;
+    }
 }

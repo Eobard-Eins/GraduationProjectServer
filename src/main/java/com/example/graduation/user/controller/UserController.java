@@ -26,28 +26,28 @@ public class UserController {
     }
 
     @GetMapping("/loginWithPassword")
-    public Res<User> loginWithPassword(@RequestParam("phone") String phone, @RequestParam("password") String password){
-        return userService.loginWithPassword(phone, password);
+    public Res<User> loginWithPassword(@RequestParam("mailAddress") String mailAddress, @RequestParam("password") String password){
+        return userService.loginWithPassword(mailAddress, password);
     }
 
     @GetMapping("/loginWithCaptcha")
-    public Res<User> loginWithCaptcha(@RequestParam("phone") String phone, @RequestParam("captcha") String captcha){
-        return userService.loginWithCaptcha(phone, captcha);
+    public Res<User> loginWithCaptcha(@RequestParam("mailAddress") String mailAddress, @RequestParam("captcha") String captcha){
+        return userService.loginWithCaptcha(mailAddress, captcha);
     }
 
     @GetMapping("/loginWithCaptchaByUserExist")
-    public Res<User> loginWithCaptchaByUserExist(@RequestParam("phone") String phone, @RequestParam("captcha") String captcha){
-        return userService.loginWithCaptchaByUserExist(phone, captcha);
+    public Res<User> loginWithCaptchaByUserExist(@RequestParam("mailAddress") String mailAddress, @RequestParam("captcha") String captcha){
+        return userService.loginWithCaptchaByUserExist(mailAddress, captcha);
     }
 
     @PostMapping("/loginWithCaptchaByUserNotExist")
-    public Res<Boolean> loginWithCaptchaByUserNotExist(@RequestParam("phone") String phone, @RequestParam("captcha") String captcha){
-        return userService.loginWithCaptchaByUserNotExist(phone, captcha);
+    public Res<Boolean> loginWithCaptchaByUserNotExist(@RequestParam("mailAddress") String mailAddress, @RequestParam("captcha") String captcha){
+        return userService.loginWithCaptchaByUserNotExist(mailAddress, captcha);
     }
 
     @GetMapping("/sendCaptcha")
-    public Res<Boolean> sendCaptcha(@RequestParam("phone") String phone){
-        return userService.sendCaptcha(phone);
+    public Res<Boolean> sendCaptcha(@RequestParam("mailAddress") String mailAddress){
+        return userService.sendCaptcha(mailAddress);
     }
 
 }

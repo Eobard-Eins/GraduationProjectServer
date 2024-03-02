@@ -11,7 +11,7 @@ import org.springframework.context.annotation.PropertySource;
  * @desc oss配置
  */
 @Configuration
-@PropertySource(value = {"classpath:application.properties"})
+@PropertySource(value = {"classpath:application.yml"})
 @ConfigurationProperties(prefix = "aliyun")
 @Data
 public class OssConfig {

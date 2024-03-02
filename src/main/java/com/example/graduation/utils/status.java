@@ -13,6 +13,7 @@ public class status {
     static public int captchaError=1103;//验证码错误
     static public int passwordInconsistent=1104;//密码不一致
     static public int setPasswordError=1105;//通信数据库设置密码错误
+    static public int captchaExpiration=1106;//验证码过期
 
     /**
      * 用户信息
@@ -24,13 +25,14 @@ public class status {
     static public int setPointError=1204;//通信数据库设置积分时出现错误
     static public int setRegisteredError=1204;//通信数据库设置注册状态时出现错误
     static public int setAvatarError=1205;//通信数据库设置头像时出现错误
-
+    static public int avatarMissing=1206;//头像路径为空
     /**
      * 网络
      */
     static public int netError=1300;//网络错误
     static public int ossError=1301;//Oss服务器错误
     static public int infoMiss=1302;//传输信息缺失
+    static public int mailServiceError=1303;//邮箱验证码服务错误
 
     //不存在状态码
     static public int noStatusCode=0000;//其他

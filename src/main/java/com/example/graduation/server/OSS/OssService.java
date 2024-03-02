@@ -60,7 +60,7 @@ public class OssService {
         }
         fileUploadResult.setStatus(FileStatus.done);
         fileUploadResult.setResponse("success");
-        fileUploadResult.setName(this.ossConfig.getUrlPrefix() + filePath);
+        fileUploadResult.setName(this.ossConfig.getUrlPrefix()+ "/" + filePath);
         fileUploadResult.setUid(String.valueOf(System.currentTimeMillis()));
         return fileUploadResult;
     }
@@ -93,8 +93,9 @@ public class OssService {
      * @desc 删除文件
      */
     public FileUploadResult delete(String objectName) {
+        String s = StringUtils.substringAfterLast(objectName,"com/");
         // 根据BucketName,objectName删除文件
-        ossClient.deleteObject(ossConfig.getBucketName(), objectName);
+        ossClient.deleteObject(ossConfig.getBucketName(), s);
         FileUploadResult fileUploadResult = new FileUploadResult();
         fileUploadResult.setName(objectName);
         fileUploadResult.setStatus(FileStatus.removed);

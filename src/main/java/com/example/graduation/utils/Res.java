@@ -37,14 +37,17 @@ public class Res<T> {
 //    public Optional<Integer> getStatusCode() {
 //        return Optional.ofNullable(statusCode);
 //    }
-    public static <T> Res<T> Sucess(T data) {
+    public static <T> Res<T> Success(T data) {
         return new Res<>(data);
     }
-    public static <T> Res<T> Sucess(Integer statusCode, T data) {
+    public static <T> Res<T> Success(Integer statusCode, T data) {
         return new Res<>(statusCode, data);
     }
     public static <T> Res<T> Error(Integer statusCode) {
         return new Res<>(statusCode);
     }
+
+    public boolean isError(){return statusCode != status.success;}
+    public boolean isSuccess(){return statusCode == status.success;}
 }
 

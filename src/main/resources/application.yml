@@ -1,0 +1,53 @@
+
+server:
+  port:8080
+
+#TODO: mysql
+spring:
+  datasource:
+    url : jdbc:mysql://localhost:3306/mysql
+    username : root
+    password : root
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 1000MB
+  #TODO: mail
+  mail:
+    host: smtp.163.com
+    username: bangboomproject@163.com
+    password: QUAOVEDKCWJPCREA
+    default-encoding: UTF-8
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+  #TODO: redis
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      connect-timeout: 1000
+
+#TODO: OSS
+aliyun:
+  endpoint: oss-cn-shenzhen.aliyuncs.com
+  accessKeyId: LTAI5tEV7kYfDPQfo6AXVFzo
+  accessKeySecret: Rhzz3zVgYPC033gNoteZ6SGSBnB636
+  bucketName: eins-graduatin-oss
+  urlPrefix: eins-graduatin-oss.oss-cn-shenzhen.aliyuncs.com
+
+
+
+
+#sms config
+sms:
+  server:
+    #时限/s
+    smsValidTimeInterval: 300
+    length: 6
+    title: 【帮帮】验证码
