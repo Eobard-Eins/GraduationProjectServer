@@ -51,3 +51,6 @@ sms:
     smsValidTimeInterval: 300
     length: 6
     title: 【帮帮】验证码
+
+pyServer:
+  url: http://127.0.0.1:8888

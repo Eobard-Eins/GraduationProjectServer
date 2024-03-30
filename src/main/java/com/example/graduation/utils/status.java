@@ -7,7 +7,7 @@ public class status {
     /**
      * 手机号、验证码、密码
      * */
-    static public int phoneFormatError=1100;//手机号格式错误
+    static public int mailFormatError=1100;//手机号格式错误
     static public int passwordFormatError=1101;//密码格式错误
     static public int passwordError=1102;//密码错误
     static public int captchaError=1103;//验证码错误
@@ -33,6 +33,13 @@ public class status {
     static public int ossError=1301;//Oss服务器错误
     static public int infoMiss=1302;//传输信息缺失
     static public int mailServiceError=1303;//邮箱验证码服务错误
+    static public int pyServerError=1304;//PyServer错误
+
+    /**
+     * task状态
+     */
+    static public int taskAddError=1400;
+    static public int taskGetError=1401;
 
     //不存在状态码
     static public int noStatusCode=0000;//其他

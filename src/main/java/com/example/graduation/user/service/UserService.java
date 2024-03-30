@@ -1,5 +1,6 @@
 package com.example.graduation.user.service;
 
+import com.example.graduation.server.PyServer.PyServer;
 import com.example.graduation.server.mailService.MailService;
 import com.example.graduation.user.model.User;
 import com.example.graduation.user.repository.UserRepository;
@@ -23,11 +24,13 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private MailService mailService;
+    @Autowired
+    private PyServer pyServer;
 
     private final Logger logger = LoggerFactory.getLogger(MailService.class);
-    public Res<User> loginWithPassword(String mailAddress, String password) {
+    public Res<User> loginWithPassword(String email, String password) {
         try{
-            Optional<User> u=userRepository.findById(mailAddress);
+            Optional<User> u=userRepository.findById(email);
             if(u.isEmpty()) return Res.Error(status.userNotExist);
             if(password.equals(u.get().getPassword())){
                 return Res.Success(u.get());
@@ -40,30 +43,35 @@ public class UserService {
         }
     }
 
-    //TODO: 验证码最后写
-    public Res<User> loginWithCaptcha(String mailAddress, String captcha) {
-        Res<Boolean> res=mailService.verify(mailAddress, captcha);
-        if(res.isSuccess()){
-            Optional<User> u=userRepository.findById(mailAddress);
-            if(u.isEmpty()) {
-                User t=new User();
-                return Res.Error(status.successButUserNotExist);
-            }
-            return Res.Success(u.get());
+    public Res<User> loginWithCaptcha(String email, String captcha) {
+       try{
+           Res<Boolean> res=mailService.verify(email, captcha);
+           if(res.isSuccess()){//验证通过
+               Optional<User> u=userRepository.findById(email);
+               if(u.isEmpty()||u.get().getPassword()==null) {//用户不存在或未设置密码
+                   Res<Boolean> pyres=pyServer.addUser(email);
+                   if(pyres.isError()) return Res.Error(pyres.getStatusCode());//pyServer添加用户失败
+                   User t=new User(email);
+                   userRepository.save(t);
+                   return Res.Error(status.successButUserNotExist);
+               }
+               return Res.Success(u.get());
+           }
+           return Res.Error(res.getStatusCode());
+       }catch (Exception e){
+           logger.error("login with captcha"+e.getMessage());
+           return Res.Error(status.netError);
+       }
+    }
+
+
+    public Res<Boolean> sendCaptcha(String email) {
+        try{
+            return mailService.sendMailCode(email);
+        }catch (Exception e){
+            logger.error("send captcha"+e.getMessage());
+            return Res.Error(status.netError);
         }
-        return Res.Success(new User());
-    }
-
-    public Res<User> loginWithCaptchaByUserExist(String mailAddress, String captcha) {
-        return Res.Success(new User());
-    }
-
-    public Res<Boolean> loginWithCaptchaByUserNotExist(String mailAddress, String captcha) {
-        return Res.Success(true);
-    }
-
-    public Res<Boolean> sendCaptcha(String mailAddress) {
-        return mailService.sendMailCode(mailAddress);
     }
 
 }

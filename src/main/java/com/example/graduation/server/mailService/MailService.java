@@ -75,7 +75,7 @@ public class MailService {
      * 验证安全码
      * @param emailAddress
      * @param code
-     * @return boolean
+     * @return captchaExpiration/captchaError/
      */
     public Res<Boolean> verify(@RequestParam String emailAddress, @RequestParam String code) {
         if(Boolean.FALSE.equals(stringRedisTemplate.hasKey(emailAddress))){

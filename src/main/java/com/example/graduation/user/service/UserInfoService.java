@@ -30,10 +30,10 @@ public class UserInfoService {
     private UserRepository userRepository;
 
     private final Logger logger = LoggerFactory.getLogger(MailService.class);
-    public Res<Boolean> setPassword(String mailAddress, String password) {
+    public Res<Boolean> setPassword(String email, String password) {
         try{
-            int res=userRepository.updatePassword(password, mailAddress);
-            //更新条数不为1时出现密码设置错误，但是大于1的情况不存在（因为mailAddress是主键），不存在影响其他用户的情况
+            int res=userRepository.updatePassword(password, email);
+            //更新条数不为1时出现密码设置错误，但是大于1的情况不存在（因为email是主键），不存在影响其他用户的情况
             if(res!=1) return Res.Error(status.setPasswordError);
             else return Res.Success(true);
         }catch (Exception e){
@@ -42,20 +42,10 @@ public class UserInfoService {
         }
     }
 
-//    public Res<Boolean> setNameAndAvatar(String mailAddress, String username, MultipartFile uploadFile) {
-//        Res<Boolean> res1=setName(mailAddress, username);
-//        if(res1.statusCode!=status.success) return res1;
-//
-//        Res<Boolean> res2=setAvatar(mailAddress, uploadFile);
-//        if(res2.statusCode!=status.success) return res2;
-//
-//        return Res.Success(true);
-//
-//    }
 
-    public Res<Boolean> setName(String mailAddress, String username) {
+    public Res<Boolean> setName(String email, String username) {
         try{
-            int res=userRepository.updateUsername(username, mailAddress);
+            int res=userRepository.updateUsername(username, email);
             if(res!=1) return Res.Error(status.setUsernameError);
             else return Res.Success(true);
         }catch (Exception e){
@@ -64,52 +54,42 @@ public class UserInfoService {
         }
     }
 
-    public Res<Boolean> setAvatar(String mailAddress, MultipartFile uploadFile) {
-        Optional<User> user=userRepository.findById(mailAddress);
-        if(user.isEmpty()) {
-            logger.error("user not exist");
-            return Res.Error(status.userNotExist);
-        }
-        String s=user.get().getAvatar();
+    public Res<Boolean> setAvatar(String email, MultipartFile uploadFile) {
+        try{
+            Optional<User> user=userRepository.findById(email);
+            if(user.isEmpty()) {
+                logger.error("user not exist");
+                return Res.Error(status.userNotExist);
+            }
+            String s=user.get().getAvatar();
 
-        FileUploadResult fres = ossService.upload(uploadFile);
-        if(fres.getStatus()== FileStatus.error){
-            logger.error("oss server error");
-            return Res.Error(status.ossError);
-        }else if(fres.getStatus()== FileStatus.done){
-            //删除旧的
-            if(s!=null) ossService.delete(s);
-            String furl= fres.getName();
-            //将url存入数据库
-            try{
-                int res=userRepository.updateAvatar(furl, mailAddress);
+            FileUploadResult fres = ossService.upload(uploadFile);
+            if(fres.getStatus()== FileStatus.error){
+                logger.error("oss server error");
+                return Res.Error(status.ossError);
+            }else if(fres.getStatus()== FileStatus.done){
+                //删除旧的
+                if(s!=null&& !s.equals("eins-graduatin-oss.oss-cn-shenzhen.aliyuncs.com/default.jpg"))
+                    ossService.delete(s);
+                String furl= fres.getName();
+                //将url存入数据库
+                int res=userRepository.updateAvatar(furl, email);
                 if(res!=1) return Res.Error(status.setAvatarError);
                 else return Res.Success(true);
-            }catch (Exception e){
-                logger.error("set avatar error"+e.getMessage());
-                return Res.Error(status.netError);
+            }else{
+                logger.error("oss server error");
+                return Res.Error(status.ossError);
             }
-
-        }else{
-            logger.error("oss server error");
-            return Res.Error(status.ossError);
-        }
-    }
-
-    public Res<Boolean> setLongitudeAndLatitude(String mailAddress, Double longitude, Double latitude) {
-        try{
-            int res=userRepository.updateLongitudeAndLongitude(longitude, latitude, mailAddress);
-            if(res!=1) return Res.Error(status.setLongitudeAndLatitudeError);
-            else return Res.Success(true);
-        }catch (Exception e){
-            logger.error("set longitude and latitude "+e.getMessage());
+        }catch(Exception e){
+            logger.error("set avatar error"+e.getMessage());
             return Res.Error(status.netError);
         }
     }
 
-    public Res<Boolean> setPoint(String mailAddress, Double point) {
+
+    public Res<Boolean> setPoint(String email, Double point) {
         try{
-            int res=userRepository.updatePoint(point, mailAddress);
+            int res=userRepository.updatePoint(point, email);
             if(res!=1) return Res.Error(status.setPointError);
             else return Res.Success(true);
         }catch (Exception e){
@@ -118,20 +98,10 @@ public class UserInfoService {
         }
     }
 
-    public Res<Boolean> setRegistered(String mailAddress, boolean registered) {
-        try{
-            int res=userRepository.updateRegistered(registered, mailAddress);
-            if(res!=1) return Res.Error(status.setRegisteredError);
-            else return Res.Success(true);
-        }catch (Exception e){
-            logger.error("set registered error "+e.getMessage());
-            return Res.Error(status.netError);
-        }
-    }
 
-    public Res<User> getInfo(String mailAddress) {
+    public Res<User> getInfo(String email) {
         try{
-            Optional<User> user=userRepository.findById(mailAddress);
+            Optional<User> user=userRepository.findById(email);
             if(user.isEmpty()) return Res.Error(status.userNotExist);
             else return Res.Success(user.get());
         }catch (Exception e){

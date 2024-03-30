@@ -2,13 +2,13 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.1'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '21'
 }
 
 configurations {
@@ -45,8 +45,17 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3:3.12.0'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
     implementation 'com.alibaba:fastjson:2.0.32'
+    implementation 'org.jsoup:jsoup:1.15.3'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation "org.jetbrains.kotlin:kotlin-reflect"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2'
+
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+kotlin {
+    jvmToolchain(21)
 }

@@ -10,45 +10,38 @@ import lombok.*;
 @Data
 @Builder
 @Entity
-@Table(name = "users")
+@Table(name = "user_info")
 public class User {
 
     @Id
 //    @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    private long id;
 
-    @Column(name = "mailAddress")
-    private String mailAddress;
+    @Column(name = "email")
+    public String email;
 
     @Column(name = "username")
-    private String username;
+    public String username;
 
     @Column(name = "password")
-    private String password;
+    public String password;
 
     //性别
     @Column(name = "gender")
-    private String gender;
+    public String gender;
 
     //头像
     @Column(name = "avatar")
-    private String avatar;
+    public String avatar;
 
     //积分
     @Column(name = "point")
-    private Double point;
+    public Double point;
 
-    @Column(name = "registered")
-    private boolean registered;
-
-//    //最后登录时间
-//    @Column(name = "last_login_time")
-//    private String lastLoginTime;
-    User(String email){
-        this.mailAddress=email;
+    public User(String email){
+        this.email=email;
         this.username=email.substring(0, email.indexOf('@'));
         this.avatar="eins-graduatin-oss.oss-cn-shenzhen.aliyuncs.com/default.jpg";
         this.point=5.0;
-        this.registered=false;
     }
 }

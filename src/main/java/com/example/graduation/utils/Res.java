@@ -1,5 +1,8 @@
 package com.example.graduation.utils;
 
+import lombok.Data;
+
+@Data
 public class Res<T> {
     public T data;
     public Integer statusCode;

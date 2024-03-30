@@ -1,40 +1,28 @@
-package com.example.graduation.user.repository;
+package com.example.graduation.user.repository
 
-import com.example.graduation.user.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import com.example.graduation.user.model.User
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
 
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+interface UserRepository : JpaRepository<User, String> {
     @Modifying
-    @Query(value = "update users set username = :un where mailAddress = :ph", nativeQuery = true)
-    int updateUsername(@Param("un") String username, @Param("ph") String mailAddress);//返回更新条数
-
-    @Modifying
-    @Query(value = "update users set password = :pw where mailAddress = :ph", nativeQuery = true)
-    int updatePassword(@Param("pw") String password, @Param("ph") String mailAddress);
+    @Query(value = "update user_info set username = :un where email = :ph", nativeQuery = true)
+    fun updateUsername(@Param("un") username: String, @Param("ph") email: String): Int // 返回更新条数
 
     @Modifying
-    @Query(value = "update users set avatar = :ava where mailAddress = :ph", nativeQuery = true)
-    int updateAvatar(@Param("ava") String avatar, @Param("ph") String mailAddress);
+    @Query(value = "update user_info set password = :pw where email = :ph", nativeQuery = true)
+    fun updatePassword(@Param("pw") password: String, @Param("ph") email: String): Int
 
     @Modifying
-    @Query(value = "update users set longitude = :lng, latitude = :lat where mailAddress = :ph", nativeQuery = true)
-    int updateLongitudeAndLongitude(@Param("lng") Double longitude, @Param("lat") Double latitude, @Param("ph") String mailAddress);
+    @Query(value = "update user_info set avatar = :ava where email = :ph", nativeQuery = true)
+    fun updateAvatar(@Param("ava") avatar: String, @Param("ph") email: String): Int
 
     @Modifying
-    @Query(value = "update users set point = :pt where mailAddress = :ph", nativeQuery = true)
-    int updatePoint(@Param("pt") Double point, @Param("ph") String mailAddress);
-
-    @Modifying
-    @Query(value = "update users set registered = :reg where mailAddress = :ph", nativeQuery = true)
-    int updateRegistered(@Param("reg") boolean registered, @Param("ph") String mailAddress);
-
-
+    @Query(value = "update user_info set point = :pt where email = :ph", nativeQuery = true)
+    fun updatePoint(@Param("pt") point: Double, @Param("ph") email: String): Int
 }

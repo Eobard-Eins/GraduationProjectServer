@@ -21,6 +21,11 @@ public class UserInfoController {
     @Autowired
     private UserInfoService userInfoService;
 
+    /**
+     * 设置密码
+     * @param info
+     * @return setPasswordError/netError/infoMiss
+     */
     @PutMapping("/setPassword")
     public Res<Boolean> setPassword(@RequestBody String info){
         Map json= JSONObject.parseObject(info, Map.class);;
@@ -29,12 +34,11 @@ public class UserInfoController {
         return Res.Error(status.infoMiss);
     }
 
-//    @PostMapping("/setNameAndAvatar")
-//    public Res<Boolean> setNameAndAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String mailAddress, @RequestParam("un") String username){
-//        //TODO: 设置头像和用户名，调用两个函数分别设置
-//        return userInfoService.setNameAndAvatar(mailAddress, username, uploadFile);
-//    }
-
+    /**
+     * 设置用户名
+     * @param info
+     * @return infoMiss/netError/setUsernameError
+     */
     @PutMapping("/setName")
     public Res<Boolean> setName(@RequestBody String info) {
         Map json= JSONObject.parseObject(info, Map.class);;
@@ -43,16 +47,22 @@ public class UserInfoController {
         return Res.Error(status.infoMiss);
     }
 
+    /**
+     * 设置头像
+     * @param uploadFile
+     * @param mailAddress
+     * @return userNotExist/ossError/setAvatarError/netError
+     */
     @PostMapping("/setAvatar")
     public Res<Boolean> setAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String mailAddress){
         return userInfoService.setAvatar(mailAddress, uploadFile);
     }
 
-//    @PutMapping("/setLongitudeAndLatitude")
-//    public Res<Boolean> setLongitudeAndLatitude(String mailAddress, Double longitude, Double latitude){
-//        return userInfoService.setLongitudeAndLatitude(mailAddress, longitude, latitude);
-//    }
-
+    /**
+     * 设置积分
+     * @param info
+     * @return setPointError/netError/infoMiss
+     */
     @PutMapping("/setPoint")
     public Res<Boolean> setPoint(@RequestBody String info){
         Map json= JSONObject.parseObject(info, Map.class);;
@@ -61,19 +71,10 @@ public class UserInfoController {
         return Res.Error(status.infoMiss);
     }
 
-
-    @PutMapping("/setRegistered")
-    public Res<Boolean> setRegistered(@RequestBody String info){
-        Map json= JSONObject.parseObject(info, Map.class);;
-        if(json.containsKey("mailAddress")&&json.containsKey("registered"))
-            return userInfoService.setRegistered((String) json.get("mailAddress"), (Boolean) json.get("registered"));
-        return Res.Error(status.infoMiss);
-    }
-
     /**
      * 获取用户信息
      * @param mailAddress 手机号码
-     * @return 用户信息实体类对象
+     * @return netError/userNotExist
      */
     @GetMapping("/getInfo")
     public Res<User> getInfo(@RequestParam("mailAddress") String mailAddress){
