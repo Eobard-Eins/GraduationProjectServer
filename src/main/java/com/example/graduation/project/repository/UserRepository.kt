@@ -1,14 +1,12 @@
-package com.example.graduation.user.repository
+package com.example.graduation.project.repository
 
-import com.example.graduation.user.model.User
+import com.example.graduation.project.model.User
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
-import org.springframework.stereotype.Repository
 
-@Repository
+
 interface UserRepository : JpaRepository<User, String> {
     @Modifying
     @Query(value = "update user_info set username = :un where email = :ph", nativeQuery = true)

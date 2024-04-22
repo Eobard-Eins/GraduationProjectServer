@@ -1,9 +1,9 @@
-package com.example.graduation.user.service;
+package com.example.graduation.project.service;
 
 import com.example.graduation.server.PyServer.PyServer;
 import com.example.graduation.server.mailService.MailService;
-import com.example.graduation.user.model.User;
-import com.example.graduation.user.repository.UserRepository;
+import com.example.graduation.project.model.User;
+import com.example.graduation.project.repository.UserRepository;
 import com.example.graduation.utils.Res;
 import com.example.graduation.utils.status;
 import jakarta.transaction.Transactional;

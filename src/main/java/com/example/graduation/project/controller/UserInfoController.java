@@ -1,8 +1,8 @@
-package com.example.graduation.user.controller;
+package com.example.graduation.project.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.graduation.user.model.User;
-import com.example.graduation.user.service.UserInfoService;
+import com.example.graduation.project.model.User;
+import com.example.graduation.project.service.UserInfoService;
 import com.example.graduation.utils.Res;
 import com.example.graduation.utils.status;
 import org.springframework.beans.factory.annotation.Autowired;

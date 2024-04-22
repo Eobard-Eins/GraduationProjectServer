@@ -1,14 +1,10 @@
-package com.example.graduation.user.controller;
+package com.example.graduation.project.controller;
 
-import com.example.graduation.user.model.User;
-import com.example.graduation.user.service.UserService;
+import com.example.graduation.project.model.User;
+import com.example.graduation.project.service.UserService;
 import com.example.graduation.utils.Res;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @CrossOrigin("*")
 @RestController

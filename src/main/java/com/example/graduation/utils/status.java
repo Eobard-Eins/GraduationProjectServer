@@ -26,6 +26,8 @@ public class status {
     static public int setRegisteredError=1204;//通信数据库设置注册状态时出现错误
     static public int setAvatarError=1205;//通信数据库设置头像时出现错误
     static public int avatarMissing=1206;//头像路径为空
+    static public int userGetError=1207;
+    static public int userPointNotEnough=1208;
     /**
      * 网络
      */
@@ -40,6 +42,26 @@ public class status {
      */
     static public int taskAddError=1400;
     static public int taskGetError=1401;
+    static public int taskPublic=1402;
+    static public int taskRequestExist=1403;
+    static public int taskStatusChangeError=1404;
+    static public int taskBeAccessed=1404;
+    static public int historyGetError=1405;
+    static public int taskTimeout=1406;//超时
+    static public int taskDone=1407;//处理完成
+
+    /**
+     * 动作状态
+     */
+    static public int click=1500;
+    static public int like=1501;
+    static public int chat=1502;
+    static public int access=1503;
+    static public int dislike=1504;
+    static public int accessError=1505;
+    static public int dislikeError=1506;
+    static public int likeError=1507;
+    static public int getAll=1508;
 
     //不存在状态码
     static public int noStatusCode=0000;//其他

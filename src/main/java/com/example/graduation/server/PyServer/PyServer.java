@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 public class PyServer {
-    private final Logger logger = LoggerFactory.getLogger(MailService.class);
+    private final Logger logger = LoggerFactory.getLogger(PyServer.class);
     private static final OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(3, TimeUnit.SECONDS) // 设置连接超时时间为15秒
             .build();
@@ -38,7 +38,7 @@ public class PyServer {
      * @param tags
      * @return
      */
-    public Res<Boolean> addTask(long taskId, String title, Double lat, Double lon, Boolean isOnLine, List<String> tags){
+    public Res<Boolean> addTask(String user,long taskId, String title, Double lat, Double lon, Boolean isOnLine, List<String> tags){
         StringBuilder ts= new StringBuilder();
         for(int i=0;i<tags.size();i++){
             if(i==0) ts.append(tags.get(i));
@@ -46,6 +46,7 @@ public class PyServer {
         }
         //MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = new FormBody.Builder()
+                .add("user",user)
                 .add("task", String.valueOf(taskId))
                 .add("title", title)
                 .add("latitude", lat.toString())
@@ -77,11 +78,11 @@ public class PyServer {
     }
 
     /**
-     * 使某一task失效
+     * 使某一task失效不再推荐，条件：超时或已被接取
      * @param taskId
      * @return
      */
-    public Res<Boolean> disableTask(Integer taskId){
+    public Res<Boolean> disableTask(Long taskId){
         RequestBody body = new FormBody.Builder()
                 .add("task",taskId.toString())
                 .build();
@@ -131,7 +132,7 @@ public class PyServer {
             }
             JSONObject object = JSON.parseObject(Objects.requireNonNull(res.body()).string());
             if(object.getInteger("statusCode")!=status.success){
-                logger.error("引擎发生了意外");
+                logger.error("引擎发生了意外 "+object.getInteger("statusCode"));
                 return Res.Error(status.pyServerError);
             }
             JSONArray data = object.getJSONArray("data");
@@ -139,7 +140,7 @@ public class PyServer {
             for (int i=0;i<data.size();i++){
                 JSONObject item = data.getJSONObject(i);
                 Map<String ,Object> mp=new HashMap<>();
-                mp.put("taskId",item.getInteger("taskId"));
+                mp.put("taskId",item.getLongValue("taskId"));
                 mp.put("value",item.getDouble("value"));
                 mp.put("distance",item.getDouble("distance"));
                 mp.put("onLine",item.getBoolean("onLine"));

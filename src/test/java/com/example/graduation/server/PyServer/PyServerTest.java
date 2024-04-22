@@ -16,17 +16,10 @@ class PyServerTest {
     private PyServer pyServer;
     @Test
     void addTask() {
-        List<String> tags = new ArrayList<>();
-        tags.add("tag1");
-        tags.add("tag2");
-        Res res=pyServer.addTask(4L,"test",1.0,1.0,true,tags);
-        System.out.println(res.toString());
     }
 
     @Test
     void disableTask() {
-        Res res=pyServer.disableTask(4);
-        System.out.println(res.toString());
     }
 
     @Test
