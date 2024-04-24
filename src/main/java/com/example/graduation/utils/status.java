@@ -64,5 +64,5 @@ public class status {
     static public int getAll=1508;
 
     //不存在状态码
-    static public int noStatusCode=0000;//其他
+    static public int error=0000;//其他
 }

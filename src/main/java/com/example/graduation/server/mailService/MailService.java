@@ -67,7 +67,7 @@ public class MailService {
             return Res.Success(true);
         } catch (MessagingException ex) {
             logger.error("验证邮件发送时发生了意外: " + ex.getMessage());
-            return Res.Error(status.mailServiceError);
+            return Res.Error("发送验证码时出错:"+ex.getMessage());
         }
     }
 
@@ -79,13 +79,13 @@ public class MailService {
      */
     public Res<Boolean> verify(@RequestParam String emailAddress, @RequestParam String code) {
         if(Boolean.FALSE.equals(stringRedisTemplate.hasKey(emailAddress))){
-            return Res.Error(status.captchaExpiration);
+            return Res.Error("验证码已过期，请重新发送");
         }
         String s = stringRedisTemplate.opsForValue().get(emailAddress);
         if(code.equals(s)){
             stringRedisTemplate.delete(emailAddress);
             return Res.Success(true);
         }
-        return Res.Error(status.captchaError);
+        return Res.Error("验证码不匹配");
     }
 }

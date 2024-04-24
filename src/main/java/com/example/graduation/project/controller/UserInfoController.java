@@ -31,7 +31,7 @@ public class UserInfoController {
         Map json= JSONObject.parseObject(info, Map.class);;
         if(json.containsKey("mailAddress")&&json.containsKey("password"))
            return userInfoService.setPassword((String) json.get("mailAddress"), (String) json.get("password"));
-        return Res.Error(status.infoMiss);
+        return Res.Error("设置失败:info missed");
     }
 
     /**
@@ -44,7 +44,7 @@ public class UserInfoController {
         Map json= JSONObject.parseObject(info, Map.class);;
         if(json.containsKey("mailAddress")&&json.containsKey("username"))
             return userInfoService.setName((String) json.get("mailAddress"), (String) json.get("username"));
-        return Res.Error(status.infoMiss);
+        return Res.Error("设置失败:info missed");
     }
 
     /**
@@ -68,7 +68,7 @@ public class UserInfoController {
         Map json= JSONObject.parseObject(info, Map.class);;
         if(json.containsKey("mailAddress")&&json.containsKey("point"))
             return userInfoService.setPoint((String) json.get("mailAddress"), (Double) json.get("point"));
-        return Res.Error(status.infoMiss);
+        return Res.Error("设置失败:info missed");
     }
 
     /**

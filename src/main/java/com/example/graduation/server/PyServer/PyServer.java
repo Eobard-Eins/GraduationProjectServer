@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 public class PyServer {
     private final Logger logger = LoggerFactory.getLogger(PyServer.class);
     private static final OkHttpClient client = new OkHttpClient.Builder()
-            .connectTimeout(3, TimeUnit.SECONDS) // 设置连接超时时间为15秒
+            .connectTimeout(3, TimeUnit.SECONDS) // 设置连接超时时间为3秒
             .build();
     @Autowired
     private PyServerConfig pyServerConfig;
@@ -62,18 +62,18 @@ public class PyServer {
         try (Response res = client.newCall(request).execute()){
             if (!res.isSuccessful()) {
                 logger.error("引擎连接失败");
-                return Res.Error(status.pyServerError);
+                throw new Exception("Engine connection failed");
             }
             JSONObject object = JSON.parseObject(Objects.requireNonNull(res.body()).string());
             if(object.getInteger("statusCode")!=status.success){
                 logger.error("引擎发生了意外");
-                return Res.Error(status.pyServerError);
+                throw new Exception("there was an accident inside the engine");
             }
-            if(!object.getBoolean("data")) return Res.Error(status.pyServerError);
+            if(!object.getBoolean("data")) throw new Exception("add task to engine failed");
             return Res.Success(true);
         }catch (Exception e){
             logger.error("引擎通信时发生了意外: " + e.getMessage());
-            return Res.Error(status.pyServerError);
+            return Res.Error(e.getMessage());
         }
     }
 
@@ -94,18 +94,18 @@ public class PyServer {
         try (Response res = client.newCall(request).execute()){
             if (!res.isSuccessful()) {
                 logger.error("引擎连接失败");
-                return Res.Error(status.pyServerError);
+                throw new Exception("Engine connection failed");
             }
             JSONObject object = JSON.parseObject(Objects.requireNonNull(res.body()).string());
             if(object.getInteger("statusCode")!=status.success){
                 logger.error("引擎发生了意外");
-                return Res.Error(status.pyServerError);
+                throw new Exception("there was an accident inside the engine");
             }
-            if(!object.getBoolean("data")) return Res.Error(status.pyServerError);
+            if(!object.getBoolean("data")) throw new Exception("disable task failed");
             return Res.Success(true);
         }catch (Exception e){
             logger.error("引擎通信时发生了意外: " + e.getMessage());
-            return Res.Error(status.pyServerError);
+            return Res.Error(e.getMessage());
         }
     }
 
@@ -128,12 +128,12 @@ public class PyServer {
         try (Response res = client.newCall(request).execute()){
             if (!res.isSuccessful()) {
                 logger.error("引擎连接失败");
-                return Res.Error(status.pyServerError);
+                throw new Exception("Engine connection failed");
             }
             JSONObject object = JSON.parseObject(Objects.requireNonNull(res.body()).string());
             if(object.getInteger("statusCode")!=status.success){
                 logger.error("引擎发生了意外 "+object.getInteger("statusCode"));
-                return Res.Error(status.pyServerError);
+                throw new Exception("there was an accident inside the engine");
             }
             JSONArray data = object.getJSONArray("data");
             List<Map<String,Object>> ls=new ArrayList<>();
@@ -149,7 +149,7 @@ public class PyServer {
             return Res.Success(ls);
         }catch (Exception e){
             logger.error("引擎通信时发生了意外: " + e.getMessage());
-            return Res.Error(status.pyServerError);
+            return Res.Error(e.getMessage());
         }
     }
 
@@ -170,18 +170,18 @@ public class PyServer {
         try (Response res = client.newCall(request).execute()){
             if (!res.isSuccessful()) {
                 logger.error("引擎连接失败");
-                return Res.Error(status.pyServerError);
+                throw new Exception("Engine connection failed");
             }
             JSONObject object = JSON.parseObject(Objects.requireNonNull(res.body()).string());
             if(object.getInteger("statusCode")!=status.success){
                 logger.error("引擎发生了意外");
-                return Res.Error(status.pyServerError);
+                throw new Exception("there was an accident inside the engine");
             }
-            if(!object.getBoolean("data")) return Res.Error(status.pyServerError);
+            if(!object.getBoolean("data")) throw new Exception("add user to engine failed");
             return Res.Success(true);
         }catch (Exception e){
             logger.error("引擎通信时发生了意外: " + e.getMessage());
-            return Res.Error(status.pyServerError);
+            return Res.Error(e.getMessage());
         }
     }
 
@@ -206,18 +206,18 @@ public class PyServer {
         try (Response res = client.newCall(request).execute()){
             if (!res.isSuccessful()) {
                 logger.error("引擎连接失败");
-                return Res.Error(status.pyServerError);
+                throw new Exception("Engine connection failed");
             }
             JSONObject object = JSON.parseObject(Objects.requireNonNull(res.body()).string());
             if(object.getInteger("statusCode")!=status.success){
                 logger.error("引擎发生了意外");
-                return Res.Error(status.pyServerError);
+                throw new Exception("there was an accident inside the engine");
             }
-            if(!object.getBoolean("data")) return Res.Error(status.pyServerError);
+            if(!object.getBoolean("data")) throw new Exception("update prefer failed");
             return Res.Success(true);
         }catch (Exception e){
             logger.error("引擎通信时发生了意外: " + e.getMessage());
-            return Res.Error(status.pyServerError);
+            return Res.Error(e.getMessage());
         }
     }
 }

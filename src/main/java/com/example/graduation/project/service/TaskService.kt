@@ -32,7 +32,7 @@ class TaskService @Autowired constructor(
 ){
 
 
-
+    private val logger= LoggerFactory.getLogger(TaskService::class.java)
     suspend fun addTask(
             user:String,
             images: List<MultipartFile>,
@@ -49,8 +49,8 @@ class TaskService @Autowired constructor(
     ): Res<Boolean> = coroutineScope{
         try {
             val u=userRepository.findById(user)
-            if(u.isEmpty) throw Exception("user not found")
-            if(u.get().point<point) throw Exception("user point not enough")
+            if(u.isEmpty) throw Exception("委托上传失败:user info not found")
+            if(u.get().point<point) throw Exception("用户积分不足:point not enough")
             u.get().point-=point
             userRepository.save(u.get())
 
@@ -60,23 +60,25 @@ class TaskService @Autowired constructor(
             val uploadImg = async {
                 try {
                     val imgUrls = mutableListOf<String>()
+                    //上传oss
                     images.forEach { i ->
                         val fres: FileUploadResult = ossService.upload(i)
                         if (fres.status == FileStatus.done) {
                             imgUrls.add(fres.name)
                         } else {
-                            LoggerFactory.getLogger(TaskService::class.java).error("OSS server error")
+                            logger.error("OSS server error")
                             throw Exception("Failed to upload image")
                         }
                     }
                     if(imgUrls.size != images.size) throw Exception("Failed to upload image")
+                    //添加数据库
                     imgUrls.forEach { imgUrl ->
                         taskImgRepository.save(TaskImage(id, imgUrl))
                     }
                     Res.Success(true)
                 } catch (e: Exception) {
-                    LoggerFactory.getLogger(TaskService::class.java).error("upload img server error")
-                    Res.Error(status.taskAddError)
+                    logger.error("upload img server error:${e.message}")
+                    Res.Error("img upload failed ")
                 }
             }
             // 上传tag至数据库
@@ -87,8 +89,8 @@ class TaskService @Autowired constructor(
                     }
                     Res.Success(true)
                 } catch (e: Exception) {
-                    LoggerFactory.getLogger(TaskService::class.java).error("upload tag server error")
-                    Res.Error(status.taskAddError)
+                    logger.error("upload tag server error")
+                    Res.Error("tag data upload failed ")
                 }
             }
             // 上传发布数据库
@@ -97,8 +99,8 @@ class TaskService @Autowired constructor(
                     taskStatusRepository.save(TaskStatus(id, user, status.taskPublic))
                     Res.Success(true)
                 } catch (e: Exception) {
-                    LoggerFactory.getLogger(TaskService::class.java).error("upload public info server error")
-                    Res.Error(status.taskAddError)
+                    logger.error("upload public info server error")
+                    Res.Error("task info upload failed ")
                 }
             }
             // 上传至Python服务器
@@ -106,11 +108,11 @@ class TaskService @Autowired constructor(
                 try {
                     val res = pyServer.addTask(user,id, title, lat, lon, onLine, tags)
                     if (res.isError || res.data == false) {
-                        throw Exception("Error while uploading to Python server")
+                        throw Exception("Error while uploading to Python server ")
                     }
                     Res.Success(true)
                 } catch (e: Exception) {
-                    Res.Error(status.taskAddError)
+                    Res.Error("recommendation engine error ")
                 }
             }
 
@@ -120,14 +122,13 @@ class TaskService @Autowired constructor(
             if (results.any { it.isError }) {
                 // 如果有错误，回滚并记录日志
                 taskInfoRepository.deleteById(id)
-                throw Exception("Task addition failed due to errors in sub-tasks")
+                throw Exception("委托上传失败:sub-task failed(${results.joinToString { it.message ?: "Unknown error" }})")
             }
 
             Res.Success(true)
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("add task error " + e.message)
-            if(e.message=="user point not enough") return@coroutineScope Res.Error(status.userPointNotEnough)
-            return@coroutineScope Res.Error(status.taskAddError)
+            logger.error("add task error " + e.message)
+            return@coroutineScope Res.Error(e.message)
         }
     }
 
@@ -137,21 +138,22 @@ class TaskService @Autowired constructor(
     ): Res<Boolean> {
         try {
             val task=taskInfoRepository.findById(id)
-            if(task.isEmpty) throw Exception("Task not found")
+            if(task.isEmpty) throw Exception("task not found")
             task.get().hot+=2
             taskInfoRepository.save(task.get())
 
             val ht=historyRepository.findById(History.HistoryPK(email,id))
-            if(ht.isEmpty) throw Exception("History not found")
+            if(ht.isEmpty) throw Exception("history not found")
             ht.get().like=true
             ht.get().dislike=false
             historyRepository.save(ht.get())
 
-            pyServer.updatePrefer(email, id.toInt(),status.like)
+            val res=pyServer.updatePrefer(email, id.toInt(),status.like)
+            if(res.isError) throw Exception("update prefer failed(${res.message})")
             return Res.Success(true)
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("like error " + e.message)
-            return Res.Error(status.likeError)
+            logger.error("like error " + e.message)
+            return Res.Error("点赞操作失败:${e.message}")
         }
     }
 
@@ -161,21 +163,22 @@ class TaskService @Autowired constructor(
     ): Res<Boolean> {
         try {
             val task=taskInfoRepository.findById(id)
-            if(task.isEmpty) throw Exception("Task not found")
+            if(task.isEmpty) throw Exception("task not found")
             task.get().hot-=2
             taskInfoRepository.save(task.get())
 
             val ht=historyRepository.findById(History.HistoryPK(email,id))
-            if(ht.isEmpty) throw Exception("History not found")
+            if(ht.isEmpty) throw Exception("history not found")
             ht.get().dislike=true
             ht.get().like=false
             historyRepository.save(ht.get())
 
-            pyServer.updatePrefer(email, id.toInt(),status.dislike)
+            val res=pyServer.updatePrefer(email, id.toInt(),status.dislike)
+            if(res.isError) throw Exception("update prefer failed(${res.message})")
             return Res.Success(true)
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("dislike error " + e.message)
-            return Res.Error(status.dislikeError)
+            logger.error("dislike error " + e.message)
+            return Res.Error("点踩操作失败:${e.message}")
         }
     }
 
@@ -186,7 +189,7 @@ class TaskService @Autowired constructor(
         try {
             val mp=mutableMapOf<String, String>()
             val task=taskInfoRepository.findById(id)
-            if(task.isEmpty) throw Exception("Task not found")
+            if(task.isEmpty) throw Exception("task not found")
             mp["title"]=task.get().title.toString()
             mp["content"]=task.get().content.toString()
             mp["time"]=task.get().lastTime.toString()
@@ -201,9 +204,9 @@ class TaskService @Autowired constructor(
             taskInfoRepository.save(task.get())
 
             val a=taskStatusRepository.findById(id)
-            if(a.isEmpty) throw Exception("task not found")
+            if(a.isEmpty) throw Exception("task status not found")
             val ur=userRepository.findById(a.get().publishUserId)
-            if(ur.isEmpty) throw Exception("User not found")
+            if(ur.isEmpty) throw Exception("user not found")
             mp["username"]=ur.get().username
             mp["avatar"]=ur.get().avatar
             mp["account"]=ur.get().email
@@ -220,8 +223,7 @@ class TaskService @Autowired constructor(
             //获取接取记录
             if(a.get().status==status.taskPublic){
                 val request=taskRequestRepository.findById(TaskRequest.TaskRequestPK(id,email))
-                if(request.isPresent) mp["request"]=true.toString()
-                else mp["request"]=false.toString()
+                mp["request"]=(request.isPresent).toString()
             }else{
                 mp["request"]=false.toString()
             }
@@ -229,11 +231,13 @@ class TaskService @Autowired constructor(
             //添加记录
             historyRepository.save(History(id,email,Date(),mp["like"].toBoolean(),mp["dislike"].toBoolean()))
 
-            pyServer.updatePrefer(email, id.toInt(),status.click)
+            val res=pyServer.updatePrefer(email, id.toInt(),status.click)
+            if(res.isError) throw Exception("update prefer failed(${res.message})")
+
             return Res.Success(mp)
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("get task error " + e.message)
-            return Res.Error(status.taskGetError)
+            logger.error("get task error " + e.message)
+            return Res.Error("详情获取失败:${e.message}")
         }
     }
     fun getTaskList(//获取推荐预览信息
@@ -245,10 +249,10 @@ class TaskService @Autowired constructor(
             lon:Double
     ): Res<List<Map<String,String>>>{
         try{
-            if(userRepository.findById(user).isEmpty) return Res.Error(status.userNotExist)
+            if(userRepository.findById(user).isEmpty) throw Exception("user info not found")
 
             val res=pyServer.getTaskList(user,search,num,lon,lat,distance)
-            if(res.isError) return Res.Error(status.taskGetError)
+            if(res.isError) throw Exception("get recommend failed(${res.message})")
 
             val resData=mutableListOf<MutableMap<String,String>>()
             for(item in res.data){
@@ -266,22 +270,22 @@ class TaskService @Autowired constructor(
                     mp["time"]=task.get().lastTime.toString()
                     mp["tags"] = JSON.toJSONString(taskTagRepository.getTags(id))
                     val a=taskStatusRepository.findById(id)
-                    if(a.isEmpty) throw Exception("task not found")
+                    if(a.isEmpty) throw Exception("task status not found")
                     val ur=userRepository.findById(a.get().publishUserId)
-                    if(ur.isEmpty) throw Exception("User not found")
+                    if(ur.isEmpty) throw Exception("user info not found")
                     mp["username"]=ur.get().username
                     mp["avatar"]=ur.get().avatar
                 }
                 else{
-                    throw Exception("Task not found")
+                    throw Exception("task not found")
                 }
 
                 resData.addLast(mp)
             }
             return Res.Success(resData)
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("get task list error " + e.message)
-            return Res.Error(status.taskGetError)
+            logger.error("get task list error " + e.message)
+            return Res.Error("获取信息失败:${e.message}")
         }
     }
 
@@ -295,8 +299,8 @@ class TaskService @Autowired constructor(
             if(res.isError) throw Exception("get history error")
             return res
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("get history list error " + e.message)
-            return Res.Error(status.historyGetError)
+            logger.error("get history list error " + e.message)
+            return Res.Error("获取历史记录失败:${ e.message }")
         }
     }
 
@@ -307,18 +311,17 @@ class TaskService @Autowired constructor(
     ): Res<Boolean>{
         try {
             val task=taskRequestRepository.findById(TaskRequest.TaskRequestPK(taskId,user))
-            if(task.isPresent) throw Exception("task request exist")
+            if(task.isPresent) throw Exception("申请记录已存在:task request exist")
 
             val t=taskInfoRepository.findById(taskId)
-            if(t.isEmpty) throw Exception("task not found")
-            if(t.get().lastTime<Date()) throw Exception("task time out")
+            if(t.isEmpty) throw Exception("申请出错:task not found")
+            if(t.get().lastTime<Date()) throw Exception("委托已超时:task time out")
 
             taskRequestRepository.save(TaskRequest(taskId,user))
             return Res.Success(true)
         }catch (e:Exception){
-            LoggerFactory.getLogger(TaskService::class.java).error("request task error " + e.message)
-            if(e.message=="task request exist") return Res.Error(status.taskRequestExist)
-            return Res.Error(status.taskGetError)
+            logger.error("request task error " + e.message)
+            return Res.Error(e.message)
         }
     }
 
@@ -339,8 +342,8 @@ class TaskService @Autowired constructor(
         }
         Res.Success(res)
     }catch (e:Exception){
-        LoggerFactory.getLogger(TaskService::class.java).error("request user get error " + e.message)
-        Res.Error(status.userGetError)
+        logger.error("request user get error " + e.message)
+        Res.Error("获取申请列表失败:${e.message}")
     }
 
     //接受委托申请
@@ -356,15 +359,16 @@ class TaskService @Autowired constructor(
         taskRequestRepository.deleteTaskRequestsByTaskIdIs(taskId)
 
         //使其在推荐引擎中失效，不再推荐给他人
-        pyServer.disableTask(taskId)
+        val res=pyServer.disableTask(taskId)
+        if(res.isError) throw Exception("disable task failed(${res.message})")
 
         ts.get().accessUserId=requestUserId
         ts.get().status=status.taskBeAccessed
         taskStatusRepository.save(ts.get())
         Res.Success(true)
     }catch (e:Exception){
-        LoggerFactory.getLogger(TaskService::class.java).error("change status error " + e.message)
-        Res.Error(status.taskStatusChangeError)
+        logger.error("change status error " + e.message)
+        Res.Error("接受委托申请失败:${e.message}")
     }
 
     fun changeStatus(
@@ -373,7 +377,7 @@ class TaskService @Autowired constructor(
     ):Res<Boolean> =try{
         val ts = taskStatusRepository.findById(task)
         if(ts.isEmpty) throw Exception("task not found")
-        if(ts.get().status==status.taskTimeout) throw Exception("status time out")
+        if(ts.get().status==status.taskTimeout) throw Exception("status is time out")
         if(newStatus==status.taskDone){
             val taskInfo = taskInfoRepository.findById(task)
             if(taskInfo.isEmpty) throw Exception("task info not found")
@@ -386,8 +390,8 @@ class TaskService @Autowired constructor(
         taskStatusRepository.save(ts.get())
         Res.Success(true)
     }catch (e:Exception){
-        LoggerFactory.getLogger(TaskService::class.java).error("change status error " + e.message)
-        Res.Error(status.taskStatusChangeError)
+        logger.error("change status error " + e.message)
+        Res.Error("状态变更失败:${e.message}")
     }
 
     fun getTasksByPublishUserIdAndStatus(
@@ -401,8 +405,8 @@ class TaskService @Autowired constructor(
         if(res.isError) throw Exception("get tasks error")
         res
     }catch(e:Exception){
-        LoggerFactory.getLogger(TaskService::class.java).error("get task error " + e.message)
-        Res.Error(com.example.graduation.utils.status.taskGetError)
+        logger.error("get task error " + e.message)
+        Res.Error("获取委托列表失败:${e.message}")
     }
     fun getTasksByAccessUserIdAndStatus(
             user:String,
@@ -415,8 +419,8 @@ class TaskService @Autowired constructor(
         if(res.isError) throw Exception("get tasks error")
         res
     }catch(e:Exception){
-        LoggerFactory.getLogger(TaskService::class.java).error("get task error " + e.message)
-        Res.Error(com.example.graduation.utils.status.taskGetError)
+        logger.error("get task error " + e.message)
+        Res.Error("获取委托列表失败:${e.message}")
     }
     
 
@@ -441,7 +445,7 @@ class TaskService @Autowired constructor(
         }
         Res.Success(res)
     }catch (e:Exception){
-        Res.Error(status.taskGetError)
+        Res.Error(e.message)
     }
 
 }

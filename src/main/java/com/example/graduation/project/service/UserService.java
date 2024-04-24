@@ -31,15 +31,15 @@ public class UserService {
     public Res<User> loginWithPassword(String email, String password) {
         try{
             Optional<User> u=userRepository.findById(email);
-            if(u.isEmpty()) return Res.Error(status.userNotExist);
+            if(u.isEmpty()) throw new Exception("用户不存在:user not exist");
             if(password.equals(u.get().getPassword())){
                 return Res.Success(u.get());
             }else{
-                return Res.Error(status.passwordError);
+                throw new Exception("密码不正确:password is wrong");
             }
         }catch (Exception e) {
             logger.error("login with password"+e.getMessage());
-            return Res.Error(status.netError);
+            return Res.Error(e.getMessage());
         }
     }
 
@@ -50,17 +50,17 @@ public class UserService {
                Optional<User> u=userRepository.findById(email);
                if(u.isEmpty()||u.get().getPassword()==null) {//用户不存在或未设置密码
                    Res<Boolean> pyres=pyServer.addUser(email);
-                   if(pyres.isError()) return Res.Error(pyres.getStatusCode());//pyServer添加用户失败
+                   if(pyres.isError()) throw new Exception("验证码正确，引擎出错:"+pyres.getMessage());//pyServer添加用户失败
                    User t=new User(email);
                    userRepository.save(t);
-                   return Res.Error(status.successButUserNotExist);
+                   return Res.SuccessBut(status.successButUserNotExist);
                }
                return Res.Success(u.get());
            }
-           return Res.Error(res.getStatusCode());
+           throw new Exception(res.getMessage());
        }catch (Exception e){
            logger.error("login with captcha"+e.getMessage());
-           return Res.Error(status.netError);
+           return Res.Error(e.getMessage());
        }
     }
 
@@ -70,7 +70,7 @@ public class UserService {
             return mailService.sendMailCode(email);
         }catch (Exception e){
             logger.error("send captcha"+e.getMessage());
-            return Res.Error(status.netError);
+            return Res.Error("发送验证码时出错:"+e.getMessage());
         }
     }
 

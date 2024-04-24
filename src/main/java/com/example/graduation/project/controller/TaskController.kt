@@ -37,7 +37,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
             return taskService.like(json["id"] as Long, json["user"] as String)
-        return Res.Error(status.infoMiss)
+        return Res.Error("点赞失败:info missed")
     }
 
     @PutMapping("/dislike")
@@ -47,7 +47,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
             return taskService.dislike(json["id"] as Long, json["user"] as String)
-        return Res.Error(status.infoMiss)
+        return Res.Error("点踩失败:info missed")
     }
 
     @GetMapping("/getList")//taskGetError/userNotExist
@@ -79,7 +79,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
             return taskService.requestTask(json["user"] as String,json["id"] as Long)
-        return Res.Error(status.infoMiss)
+        return Res.Error("申请失败:info missed")
     }
     @PutMapping("/access")
     fun accessTask(
@@ -88,7 +88,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
             return taskService.accessTask(json["user"] as String,json["id"] as Long)
-        return Res.Error(status.infoMiss)
+        return Res.Error("接受申请失败:info missed")
     }
 
     @GetMapping("/getTasksByPublicUser")
@@ -112,7 +112,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("status"))
             return taskService.changeStatus(json["id"] as Long,json["status"] as Int)
-        return Res.Error(status.infoMiss)
+        return Res.Error("状态更改失败:info missed")
     }
 
 }

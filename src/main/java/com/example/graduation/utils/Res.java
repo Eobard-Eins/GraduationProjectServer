@@ -6,7 +6,8 @@ import lombok.Data;
 public class Res<T> {
     public T data;
     public Integer statusCode;
-
+    public String message;
+    public Boolean isSuccess;
 
     /**
      * @desc 构造器Success
@@ -15,42 +16,36 @@ public class Res<T> {
     public Res(T data) {
         this.data = data;
         this.statusCode = status.success;
+        this.isSuccess = true;
     }
 
     /**
      * @desc 构造器Error，带有必填参数
-     * @param statusCode
      */
-    public Res(Integer statusCode) {
-        this.statusCode = statusCode;
+    public Res(String message,Boolean isSuccess) {
+        this.statusCode = status.error;
         this.data = null;
+        this.message = message;
+        this.isSuccess = isSuccess;
     }
 
-    public Res(Integer statusCode, T data) {
-        this.data = data;
+    public Res(Integer statusCode,Boolean isSuccess) {
         this.statusCode = statusCode;
+        this.isSuccess = isSuccess;
     }
 
 
-    // 为了模拟Dart中的null安全类型，可以使用Optional包装data和statusCode
-//    public Optional<T> getData() {
-//        return Optional.ofNullable(data);
-//    }
-//
-//    public Optional<Integer> getStatusCode() {
-//        return Optional.ofNullable(statusCode);
-//    }
     public static <T> Res<T> Success(T data) {
         return new Res<>(data);
     }
-    public static <T> Res<T> Success(Integer statusCode, T data) {
-        return new Res<>(statusCode, data);
+    public static <T> Res<T> SuccessBut(Integer statusCode) {
+        return new Res<>(statusCode,true);
     }
-    public static <T> Res<T> Error(Integer statusCode) {
-        return new Res<>(statusCode);
+    public static <T> Res<T> Error(String message) {
+        return new Res<>(message,false);
     }
 
-    public boolean isError(){return statusCode != status.success;}
-    public boolean isSuccess(){return statusCode == status.success;}
+    public boolean isError(){return !this.isSuccess;}
+    public boolean isSuccess(){return this.isSuccess;}
 }
 
