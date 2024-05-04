@@ -9,6 +9,6 @@ class TimeoutServiceTest {
 
     @Test
     fun checkTimeout() {
-        println(Date().toString())
+        println(Date().toInstant().toEpochMilli())
     }
 }

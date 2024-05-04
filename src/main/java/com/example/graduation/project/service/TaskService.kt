@@ -13,9 +13,13 @@ import jakarta.transaction.Transactional
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.time.LocalDateTime
 import java.util.*
+import kotlin.reflect.typeOf
 
 @Service
 @Transactional
@@ -26,7 +30,6 @@ class TaskService @Autowired constructor(
         private val taskImgRepository: TaskImgRepository,
         private val ossService: OssService,
         private val taskTagRepository: TaskTagRepository,
-        private val taskStatusRepository: TaskStatusRepository,
         private val historyRepository: HistoryRepository,
         private val taskRequestRepository: TaskRequestRepository
 ){
@@ -54,7 +57,7 @@ class TaskService @Autowired constructor(
             u.get().point-=point
             userRepository.save(u.get())
 
-            val tk: TaskInfo = taskInfoRepository.save(TaskInfo(title,content,addressName,address,onLine,point, Date(time)))
+            val tk: TaskInfo = taskInfoRepository.save(TaskInfo(title,content,addressName,address,onLine,point, Date(time), user, status.taskPublic))
             val id=tk.id!!
             // 上传图片至OSS
             val uploadImg = async {
@@ -93,16 +96,6 @@ class TaskService @Autowired constructor(
                     Res.Error("tag data upload failed ")
                 }
             }
-            // 上传发布数据库
-            val addPublic = async {
-                try {
-                    taskStatusRepository.save(TaskStatus(id, user, status.taskPublic))
-                    Res.Success(true)
-                } catch (e: Exception) {
-                    logger.error("upload public info server error")
-                    Res.Error("task info upload failed ")
-                }
-            }
             // 上传至Python服务器
             val pyRes = async {
                 try {
@@ -116,7 +109,7 @@ class TaskService @Autowired constructor(
                 }
             }
 
-            val results = awaitAll(uploadImg, addTag, addPublic, pyRes)
+            val results = awaitAll(uploadImg, addTag, pyRes)
 
             // 检查是否有错误
             if (results.any { it.isError }) {
@@ -127,7 +120,7 @@ class TaskService @Autowired constructor(
 
             Res.Success(true)
         }catch (e:Exception){
-            logger.error("add task error " + e.message)
+            logger.error("add task error: " + e.message)
             return@coroutineScope Res.Error(e.message)
         }
     }
@@ -152,7 +145,7 @@ class TaskService @Autowired constructor(
             if(res.isError) throw Exception("update prefer failed(${res.message})")
             return Res.Success(true)
         }catch (e:Exception){
-            logger.error("like error " + e.message)
+            logger.error("like error: " + e.message)
             return Res.Error("点赞操作失败:${e.message}")
         }
     }
@@ -177,7 +170,7 @@ class TaskService @Autowired constructor(
             if(res.isError) throw Exception("update prefer failed(${res.message})")
             return Res.Success(true)
         }catch (e:Exception){
-            logger.error("dislike error " + e.message)
+            logger.error("dislike error: " + e.message)
             return Res.Error("点踩操作失败:${e.message}")
         }
     }
@@ -195,17 +188,15 @@ class TaskService @Autowired constructor(
             mp["time"]=task.get().lastTime.toString()
             mp["address"]=task.get().address.toString()
             mp["address_name"]=task.get().addressName.toString()
-            mp["tags"]= JSON.toJSONString(taskTagRepository.getTags(id))
-            mp["imgs"]= JSON.toJSONString(taskImgRepository.getImgs(id))
+            mp["tags"]= JSON.toJSONString(taskTagRepository.findAllByPKidId(id).map { it.PKid.tag })
+            mp["imgs"]= JSON.toJSONString(taskImgRepository.findAllByPKidId(id).map { it.PKid.img })
             mp["onLine"]=task.get().online.toString()
 
             //热度+1
             task.get().hot+=1
             taskInfoRepository.save(task.get())
 
-            val a=taskStatusRepository.findById(id)
-            if(a.isEmpty) throw Exception("task status not found")
-            val ur=userRepository.findById(a.get().publishUserId)
+            val ur=userRepository.findById(task.get().publishUserId)
             if(ur.isEmpty) throw Exception("user not found")
             mp["username"]=ur.get().username
             mp["avatar"]=ur.get().avatar
@@ -220,10 +211,10 @@ class TaskService @Autowired constructor(
                 mp["like"]=history.get().like.toString()
                 mp["dislike"]=history.get().dislike.toString()
             }
-            //获取接取记录
-            if(a.get().status==status.taskPublic){
+            //获取接取记录 是否可被接取
+            if(task.get().status==status.taskPublic){
                 val request=taskRequestRepository.findById(TaskRequest.TaskRequestPK(id,email))
-                mp["request"]=(request.isPresent).toString()
+                mp["request"]=(request.isPresent).toString()//已有记录返回true，否则为false
             }else{
                 mp["request"]=false.toString()
             }
@@ -236,7 +227,7 @@ class TaskService @Autowired constructor(
 
             return Res.Success(mp)
         }catch (e:Exception){
-            logger.error("get task error " + e.message)
+            logger.error("get task error: " + e.message)
             return Res.Error("详情获取失败:${e.message}")
         }
     }
@@ -268,13 +259,13 @@ class TaskService @Autowired constructor(
                     mp["hot"]=task.get().hot.toString()
                     mp["point"]=task.get().point.toString()
                     mp["time"]=task.get().lastTime.toString()
-                    mp["tags"] = JSON.toJSONString(taskTagRepository.getTags(id))
-                    val a=taskStatusRepository.findById(id)
-                    if(a.isEmpty) throw Exception("task status not found")
-                    val ur=userRepository.findById(a.get().publishUserId)
+                    mp["tags"] = JSON.toJSONString(taskTagRepository.findAllByPKidId(id).map { it.PKid.tag })
+
+                    val ur=userRepository.findById(task.get().publishUserId)
                     if(ur.isEmpty) throw Exception("user info not found")
                     mp["username"]=ur.get().username
                     mp["avatar"]=ur.get().avatar
+                    mp["uid"]=ur.get().email
                 }
                 else{
                     throw Exception("task not found")
@@ -284,22 +275,25 @@ class TaskService @Autowired constructor(
             }
             return Res.Success(resData)
         }catch (e:Exception){
-            logger.error("get task list error " + e.message)
+            logger.error("get task list error: " + e.message)
             return Res.Error("获取信息失败:${e.message}")
         }
     }
 
     fun getHistory(
             user:String,
-            num:Int
-    ): Res<List<Map<String,String>>>{
+            pageable: Pageable
+    ): Res<Page<Map<String, String>>>{
         try {
-            val tasks=historyRepository.findByEmail(user,num).map { it.PKid.taskId }
-            val res=getTaskInfosById(tasks)
-            if(res.isError) throw Exception("get history error")
-            return res
+            val tasks=historyRepository.findAllByPKidUserId(user,pageable)
+            val res=tasks.map {
+                getTaskInfosById(it.PKid.taskId)
+            }
+            //val res=getTaskInfosById(tasks)
+            //if(res.isError) throw Exception(res.message)
+            return Res.Success(res)
         }catch (e:Exception){
-            logger.error("get history list error " + e.message)
+            logger.error("get history list error: " + e.message)
             return Res.Error("获取历史记录失败:${ e.message }")
         }
     }
@@ -320,7 +314,7 @@ class TaskService @Autowired constructor(
             taskRequestRepository.save(TaskRequest(taskId,user))
             return Res.Success(true)
         }catch (e:Exception){
-            logger.error("request task error " + e.message)
+            logger.error("request task error: " + e.message)
             return Res.Error(e.message)
         }
     }
@@ -329,7 +323,7 @@ class TaskService @Autowired constructor(
     fun getAllRequestWithTask(
             id:Long
     ):Res<List<Map<String,String>>> =try{
-        val userIds = taskRequestRepository.getTaskRequestsByTaskId(id)
+        val userIds = taskRequestRepository.findAllByPKidId(id).map { it.PKid.uid }
         val res=mutableListOf<MutableMap<String,String>>()
         for(uid in userIds){
             val u=userRepository.findById(uid)
@@ -342,7 +336,7 @@ class TaskService @Autowired constructor(
         }
         Res.Success(res)
     }catch (e:Exception){
-        logger.error("request user get error " + e.message)
+        logger.error("request user get error: " + e.message)
         Res.Error("获取申请列表失败:${e.message}")
     }
 
@@ -351,23 +345,23 @@ class TaskService @Autowired constructor(
             requestUserId:String,
             taskId:Long
     ): Res<Boolean> =try{
-        val ts = taskStatusRepository.findById(taskId)
         val t=taskInfoRepository.findById(taskId)
-        if(ts.isEmpty||t.isEmpty) throw Exception("task not found")
+        if(t.isEmpty) throw Exception("task not found")
 
         //删除记录
-        taskRequestRepository.deleteTaskRequestsByTaskIdIs(taskId)
+        taskRequestRepository.deleteTaskRequestByPKidId(taskId)
 
         //使其在推荐引擎中失效，不再推荐给他人
         val res=pyServer.disableTask(taskId)
         if(res.isError) throw Exception("disable task failed(${res.message})")
 
-        ts.get().accessUserId=requestUserId
-        ts.get().status=status.taskBeAccessed
-        taskStatusRepository.save(ts.get())
+        logger.info("user:$requestUserId access task:$taskId")
+        t.get().accessUserId=requestUserId
+        t.get().status=status.taskBeAccessed
+        taskInfoRepository.save(t.get())
         Res.Success(true)
     }catch (e:Exception){
-        logger.error("change status error " + e.message)
+        logger.error("change status error: " + e.message)
         Res.Error("接受委托申请失败:${e.message}")
     }
 
@@ -375,77 +369,79 @@ class TaskService @Autowired constructor(
             task:Long,
             newStatus:Int
     ):Res<Boolean> =try{
-        val ts = taskStatusRepository.findById(task)
+        val ts = taskInfoRepository.findById(task)
         if(ts.isEmpty) throw Exception("task not found")
         if(ts.get().status==status.taskTimeout) throw Exception("status is time out")
+        //完成委托则变更积分
         if(newStatus==status.taskDone){
-            val taskInfo = taskInfoRepository.findById(task)
-            if(taskInfo.isEmpty) throw Exception("task info not found")
-            val user = userRepository.findById(ts.get().accessUserId)
+            if(ts.get().accessUserId==null) throw Exception("task not be accessed")
+            val user = userRepository.findById(ts.get().accessUserId!!)
             if(user.isEmpty) throw Exception("user not found")
-            user.get().point+=taskInfo.get().point
+            user.get().point+=ts.get().point
             userRepository.save(user.get())
         }
         ts.get().status=newStatus
-        taskStatusRepository.save(ts.get())
+        taskInfoRepository.save(ts.get())
         Res.Success(true)
     }catch (e:Exception){
-        logger.error("change status error " + e.message)
+        logger.error("change status error: " + e.message)
         Res.Error("状态变更失败:${e.message}")
     }
 
     fun getTasksByPublishUserIdAndStatus(
             user:String,
-            taskStatus:Int
-    ):Res<List<Map<String,String>>> =try {
+            taskStatus:Int,
+            pageable: Pageable
+    ):Res<Page<Map<String,String>>> =try {
         val ids = if(taskStatus!=status.getAll)
-                taskStatusRepository.getTaskStatusByPublishUserIdIsAndStatusIs(user,taskStatus).map{ it.taskId }
-            else taskStatusRepository.getTaskStatusByPublishUserIdIs(user).map { it.taskId }
-        val res=getTaskInfosById(ids)
-        if(res.isError) throw Exception("get tasks error")
-        res
+            taskInfoRepository.getTaskStatusByPublishUserIdIsAndStatusIs(user,taskStatus,pageable).map{ it.id }
+            else taskInfoRepository.getTaskStatusByPublishUserIdIs(user,pageable).map { it.id }
+        val res=ids.map {
+            getTaskInfosById(it)
+        }
+        Res.Success(res)
     }catch(e:Exception){
-        logger.error("get task error " + e.message)
+        logger.error("get task error: " + e.message)
         Res.Error("获取委托列表失败:${e.message}")
     }
     fun getTasksByAccessUserIdAndStatus(
             user:String,
-            taskStatus:Int
-    ):Res<List<Map<String,String>>> =try {
+            taskStatus:Int,
+            pageable: Pageable
+    ):Res<Page<Map<String,String>>> =try {
         val ids = if(taskStatus!=status.getAll)
-                taskStatusRepository.getTaskStatusByAccessUserIdIsAndStatusIs(user,taskStatus).map{ it.taskId }
-            else taskStatusRepository.getTaskStatusByAccessUserIdIs(user).map { it.taskId }
-        val res=getTaskInfosById(ids)
-        if(res.isError) throw Exception("get tasks error")
-        res
+            taskInfoRepository.getTaskStatusByAccessUserIdIsAndStatusIs(user,taskStatus,pageable).map{ it.id }
+            else taskInfoRepository.getTaskStatusByAccessUserIdIs(user,pageable).map { it.id }
+        val res=ids.map {
+            getTaskInfosById(it)
+        }
+        Res.Success(res)
     }catch(e:Exception){
-        logger.error("get task error " + e.message)
+        logger.error("get task error: " + e.message)
         Res.Error("获取委托列表失败:${e.message}")
     }
     
 
+
+
     private fun getTaskInfosById(
-            tasks:List<Long>
-    ):Res<List<Map<String,String>>> =try{
-        val res = mutableListOf<MutableMap<String,String>>()
-        for(id in tasks){
-            val task=taskInfoRepository.findById(id)
-            if(task.isEmpty) throw Exception("task not found")
-            val mp=mutableMapOf<String, String>()
-            mp["id"]=id.toString()
-            mp["title"]=task.get().title.toString()
-            mp["time"]=task.get().lastTime.toString()
-            //mp["address"]=task.get().address.toString()
-            mp["address_name"]=task.get().addressName.toString()
-            //mp["tags"]= JSON.toJSONString(taskTagRepository.getTags(id))
-            mp["point"]=task.get().point.toString()
-            //mp["hot"]= task.get().hot.toString()
-            //mp["read_time"]=historyRepository.findById(History.HistoryPK(user,id)).get().time.toString()
-            res.addLast(mp)
-        }
-        Res.Success(res)
-    }catch (e:Exception){
-        Res.Error(e.message)
+            id:Long?
+    ):Map<String,String> {
+        if(id==null) throw Exception("task id is null")
+        val task=taskInfoRepository.findById(id)
+        if(task.isEmpty) throw Exception("task not found")
+        val mp=mutableMapOf<String, String>()
+        mp["id"]=id.toString()
+        mp["title"]=task.get().title.toString()
+        mp["time"]=task.get().lastTime.toString()
+        //mp["address"]=task.get().address.toString()
+        mp["address_name"]=task.get().addressName.toString()
+        //mp["tags"]= JSON.toJSONString(taskTagRepository.getTags(id))
+        mp["point"]=task.get().point.toString()
+        //mp["hot"]= task.get().hot.toString()
+        //mp["read_time"]=historyRepository.findById(History.HistoryPK(user,id)).get().time.toString()
+        return mp
     }
+
 
 }

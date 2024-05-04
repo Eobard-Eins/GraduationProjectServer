@@ -24,7 +24,6 @@ public class UserInfoController {
     /**
      * 设置密码
      * @param info
-     * @return setPasswordError/netError/infoMiss
      */
     @PutMapping("/setPassword")
     public Res<Boolean> setPassword(@RequestBody String info){
@@ -37,7 +36,6 @@ public class UserInfoController {
     /**
      * 设置用户名
      * @param info
-     * @return infoMiss/netError/setUsernameError
      */
     @PutMapping("/setName")
     public Res<Boolean> setName(@RequestBody String info) {
@@ -51,7 +49,6 @@ public class UserInfoController {
      * 设置头像
      * @param uploadFile
      * @param mailAddress
-     * @return userNotExist/ossError/setAvatarError/netError
      */
     @PostMapping("/setAvatar")
     public Res<Boolean> setAvatar(@RequestParam("file") MultipartFile uploadFile, @RequestParam("pn") String mailAddress){
@@ -61,7 +58,6 @@ public class UserInfoController {
     /**
      * 设置积分
      * @param info
-     * @return setPointError/netError/infoMiss
      */
     @PutMapping("/setPoint")
     public Res<Boolean> setPoint(@RequestBody String info){
@@ -73,12 +69,15 @@ public class UserInfoController {
 
     /**
      * 获取用户信息
-     * @param mailAddress 手机号码
-     * @return netError/userNotExist
      */
     @GetMapping("/getInfo")
     public Res<User> getInfo(@RequestParam("mailAddress") String mailAddress){
         return userInfoService.getInfo(mailAddress);
+    }
+
+    @GetMapping("/getInfoByTaskId")
+    public Res<User> getInfoByTaskId(@RequestParam("taskId") Long taskId){
+        return userInfoService.getInfoByTaskId(taskId);
     }
 
 }

@@ -1,5 +1,7 @@
 package com.example.graduation.project.service;
 
+import com.example.graduation.project.model.TaskInfo;
+import com.example.graduation.project.repository.TaskInfoRepository;
 import com.example.graduation.server.OSS.FileStatus;
 import com.example.graduation.server.OSS.FileUploadResult;
 import com.example.graduation.server.OSS.OssService;
@@ -28,8 +30,10 @@ public class UserInfoService {
     private OssService ossService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private TaskInfoRepository taskInfoRepository;
 
-    private final Logger logger = LoggerFactory.getLogger(MailService.class);
+    private final Logger logger = LoggerFactory.getLogger(UserInfoService.class);
     public Res<Boolean> setPassword(String email, String password) {
         try{
             int res=userRepository.updatePassword(password, email);
@@ -37,7 +41,7 @@ public class UserInfoService {
             if(res!=1) throw new Exception("has more than one user's password be set");
             else return Res.Success(true);
         }catch (Exception e){
-            logger.error("set password error"+e.getMessage());
+            logger.error("set password error "+e.getMessage());
             return Res.Error("设置密码失败:"+e.getMessage());
         }
     }
@@ -49,7 +53,7 @@ public class UserInfoService {
             if(res!=1) throw new Exception("has more than one user's name be set");
             else return Res.Success(true);
         }catch (Exception e){
-            logger.error("set name error"+e.getMessage());
+            logger.error("set name error "+e.getMessage());
             return Res.Error("设置用户名失败:"+e.getMessage());
         }
     }
@@ -81,7 +85,7 @@ public class UserInfoService {
                 throw new Exception("upload img to oss failed");
             }
         }catch(Exception e){
-            logger.error("set avatar error"+e.getMessage());
+            logger.error("set avatar error "+e.getMessage());
             return Res.Error("设置头像失败:"+e.getMessage());
         }
     }
@@ -93,7 +97,7 @@ public class UserInfoService {
             if(res!=1) throw new Exception("has more than one user's point be set");
             else return Res.Success(true);
         }catch (Exception e){
-            logger.error("set point error"+e.getMessage());
+            logger.error("set point error "+e.getMessage());
             return Res.Error("设置积分失败:"+e.getMessage());
         }
     }
@@ -105,8 +109,20 @@ public class UserInfoService {
             if(user.isEmpty()) throw new Exception("user info not found");
             else return Res.Success(user.get());
         }catch (Exception e){
-            logger.error("get info error"+e.getMessage());
+            logger.error("get info error "+e.getMessage());
             return Res.Error("获取用户信息失败:"+e.getMessage());
+        }
+    }
+    public Res<User> getInfoByTaskId(Long id){
+        try{
+            Optional<TaskInfo> task=taskInfoRepository.findById(id);
+            if(task.isEmpty()) throw new Exception("publish user not found");
+            Optional<User> user=userRepository.findById(task.get().getPublishUserId());
+            if(user.isEmpty()) throw new Exception("user info not found");
+            else return Res.Success(user.get());
+        }catch (Exception e){
+            logger.error("get info error "+e.getMessage());
+            return Res.Error("获取对象信息失败:"+e.getMessage());
         }
     }
 }

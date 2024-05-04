@@ -5,8 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
 
 
+@Repository
 interface UserRepository : JpaRepository<User, String> {
     @Modifying
     @Query(value = "update user_info set username = :un where email = :ph", nativeQuery = true)
@@ -23,4 +25,6 @@ interface UserRepository : JpaRepository<User, String> {
     @Modifying
     @Query(value = "update user_info set point = :pt where email = :ph", nativeQuery = true)
     fun updatePoint(@Param("pt") point: Double, @Param("ph") email: String): Int
+
+
 }

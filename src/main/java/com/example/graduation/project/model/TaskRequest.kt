@@ -11,7 +11,9 @@ data class TaskRequest (
 ){
     @Embeddable
     data class TaskRequestPK(
+            @Column(name = "task_id")
             val id: Long,
+            @Column(name = "request_user_id")
             val uid: String
     ) : Serializable {
         constructor() : this(-1,"") {}

@@ -3,6 +3,7 @@ package com.example.graduation.utils;
 public class status {
     static public int success=1000;//成功
     static public int successButUserNotExist=1001;//成功登录但是用户不存在
+    static public int successButNoChat=1002;//成功注册但是用户已存在
 
     /**
      * 手机号、验证码、密码
@@ -62,6 +63,16 @@ public class status {
     static public int dislikeError=1506;
     static public int likeError=1507;
     static public int getAll=1508;
+
+
+    static public int send=1600;
+    static public int receive=1601;
+
+    static public int read=1602;
+    static public int notRead=1603;
+    static public int newMessage=1604;
+    static public int unSend=1605;
+    static public int notServed=1606;
 
     //不存在状态码
     static public int error=0000;//其他

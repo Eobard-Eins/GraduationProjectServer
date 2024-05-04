@@ -17,21 +17,20 @@ import java.util.*
 class TimeoutService@Autowired constructor(
         private val pyServer: PyServer,
         private val taskInfoRepository: TaskInfoRepository,
-        private val taskStatusRepository: TaskStatusRepository,
 
 ) {
     private val logger= LoggerFactory.getLogger(TimeoutService::class.java)
     @Scheduled(fixedRate = 6000)
     fun checkTimeout() =try{
-        val tasks=taskInfoRepository.findAllByLastTimeBefore(Date())
+        //非过期且非完成
+        val tasks=taskInfoRepository.findAllByLastTimeBeforeAndStatusIsNotAndStatusIsNot(Date(), status.taskTimeout, status.taskDone)
+        if(tasks.isNotEmpty()) logger.info("定时任务 time: "+ LocalDateTime.now()+" num of tasks: "+tasks.size)
         for (task in tasks){
-            if(task.id==null) throw Exception("task id is null")
-            val taskStatus=taskStatusRepository.findById(task.id!!)
-            if(taskStatus.isEmpty) throw Exception("task status is null")
-            taskStatus.get().status= status.taskTimeout
-            taskStatusRepository.save(taskStatus.get())
+            task.status= status.taskTimeout
+            taskInfoRepository.save(task)
 
-            pyServer.disableTask(task.id!!)
+            val res=pyServer.disableTask(task.id!!)
+            if(res.isError) throw Exception("pyServer disableTask error: "+res.message)
         }
     }catch (e:Exception){
         logger.error("定时任务出错: "+e.message)

@@ -11,7 +11,9 @@ data class TaskImage (
 ){
     @Embeddable
     data class TaskImgPK(
+            @Column(name = "id")
             val id: Long,
+            @Column(name = "img")
             val img: String
     ) : Serializable {
         constructor() : this(-1,"") {}

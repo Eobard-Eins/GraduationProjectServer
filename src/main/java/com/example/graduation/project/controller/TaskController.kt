@@ -5,6 +5,9 @@ import com.example.graduation.project.service.TaskService
 import com.example.graduation.utils.Res
 import com.example.graduation.utils.status
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -36,7 +39,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
     ): Res<Boolean> {
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
-            return taskService.like(json["id"] as Long, json["user"] as String)
+            return taskService.like((json["id"] as Int).toLong(), json["user"] as String)
         return Res.Error("点赞失败:info missed")
     }
 
@@ -46,7 +49,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
     ): Res<Boolean> {
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
-            return taskService.dislike(json["id"] as Long, json["user"] as String)
+            return taskService.dislike((json["id"] as Int).toLong(), json["user"] as String)
         return Res.Error("点踩失败:info missed")
     }
 
@@ -69,8 +72,12 @@ class TaskController @Autowired constructor(private val taskService: TaskService
     @GetMapping("/history")
     fun getHistory(
             @RequestParam("user") user: String,
-            @RequestParam("num") num: Int
-    ): Res<List<Map<String,String>>> = taskService.getHistory(user,num)
+            @RequestParam("page",defaultValue = "0") page: Int,
+            @RequestParam("size",defaultValue = "10") size: Int
+    ): Res<Page<Map<String, String>>> {
+        val pageable: Pageable = PageRequest.of(page, size)
+        return taskService.getHistory(user, pageable)
+    }
 
     @PostMapping("/requestTask")
     fun requestTask(
@@ -78,29 +85,40 @@ class TaskController @Autowired constructor(private val taskService: TaskService
     ): Res<Boolean> {
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
-            return taskService.requestTask(json["user"] as String,json["id"] as Long)
+            return taskService.requestTask(json["user"] as String,(json["id"] as Int).toLong())
         return Res.Error("申请失败:info missed")
     }
     @PutMapping("/access")
     fun accessTask(
             @RequestBody info:String,
     ): Res<Boolean> {
+
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("user"))
-            return taskService.accessTask(json["user"] as String,json["id"] as Long)
+            return taskService.accessTask(json["user"] as String,(json["id"] as Int).toLong())
         return Res.Error("接受申请失败:info missed")
     }
 
     @GetMapping("/getTasksByPublicUser")
-    fun getAllTaskByRequestUser(
+    fun getAllTaskByPublicUser(
             @RequestParam("user") user: String,
             @RequestParam("status") status: Int,
-    ):Res<List<Map<String, String>>> = taskService.getTasksByPublishUserIdAndStatus(user,status)
+            @RequestParam("page",defaultValue = "0") page: Int,
+            @RequestParam("size",defaultValue = "10") size: Int
+    ):Res<Page<Map<String, String>>> {
+        val pageable: Pageable = PageRequest.of(page, size)
+        return taskService.getTasksByPublishUserIdAndStatus(user, status, pageable)
+    }
     @GetMapping("/getTasksByAccessUser")
     fun getAllTaskByAccessUser(
             @RequestParam("user") user: String,
             @RequestParam("status") status: Int,
-    ):Res<List<Map<String, String>>> = taskService.getTasksByAccessUserIdAndStatus(user,status)
+            @RequestParam("page",defaultValue = "0") page: Int,
+            @RequestParam("size",defaultValue = "10") size: Int
+    ):Res<Page<Map<String, String>>> {
+        val pageable: Pageable = PageRequest.of(page, size)
+        return taskService.getTasksByAccessUserIdAndStatus(user, status, pageable)
+    }
     @GetMapping("/getRequestsWithTask")
     fun getAllRequestWithTask(
             @RequestParam("id") id: Long,
@@ -111,7 +129,7 @@ class TaskController @Autowired constructor(private val taskService: TaskService
     ): Res<Boolean> {
         val json = JSONObject.parseObject<Map<*, *>>(info, MutableMap::class.java)
         if(json.containsKey("id") && json.containsKey("status"))
-            return taskService.changeStatus(json["id"] as Long,json["status"] as Int)
+            return taskService.changeStatus((json["id"] as Int).toLong(),json["status"] as Int)
         return Res.Error("状态更改失败:info missed")
     }
 

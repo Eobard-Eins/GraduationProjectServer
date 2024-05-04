@@ -33,7 +33,16 @@ data class TaskInfo(
 
         @Column(name="time", columnDefinition = "TIMESTAMP")
         var lastTime:Date,
+
+        @Column(name="publish_user_id")
+        var publishUserId:String,
+
+        @Column(name="status")
+        var status:Int,
+
+        @Column(name="access_user_id")
+        var accessUserId:String?
 ){
-    constructor(): this(null, "", "", "","", false, 0,0.0, Date())
-    constructor(title: String, content: String, addressName: String, address: String, online: Boolean,point:Double, lastTime: Date): this(null, title, content, addressName, address, online, 0,point, lastTime)
+    constructor(): this(null, "", "", "","", false, 0,0.0, Date(), "",0,"")
+    constructor(title: String, content: String, addressName: String, address: String, online: Boolean,point:Double, lastTime: Date, publishUserId:String, status:Int): this(null, title, content, addressName, address, online, 0,point, lastTime, publishUserId, status,null)
 }

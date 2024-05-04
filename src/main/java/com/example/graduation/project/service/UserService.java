@@ -27,7 +27,7 @@ public class UserService {
     @Autowired
     private PyServer pyServer;
 
-    private final Logger logger = LoggerFactory.getLogger(MailService.class);
+    private final Logger logger = LoggerFactory.getLogger(UserService.class);
     public Res<User> loginWithPassword(String email, String password) {
         try{
             Optional<User> u=userRepository.findById(email);

@@ -10,7 +10,9 @@ data class TaskTag (
 ){
     @Embeddable
     data class TaskTagPK(
+            @Column(name = "id")
             val id: Long,
+            @Column(name = "tag")
             val tag: String
     ) : Serializable {
         constructor() : this(-1,"") {}

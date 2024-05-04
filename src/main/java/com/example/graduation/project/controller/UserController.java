@@ -25,7 +25,6 @@ public class UserController {
      * @desc 用户登录
      * @param mailAddress
      * @param password
-     * @return netError/passwordError/userNotExist
      */
     @GetMapping("/loginWithPassword")
     public Res<User> loginWithPassword(@RequestParam("mailAddress") String mailAddress, @RequestParam("password") String password){
@@ -36,7 +35,6 @@ public class UserController {
      * @desc 验证码登录
      * @param mailAddress
      * @param captcha
-     * @return captchaExpiration/captchaError/successButUserNotExist/netError/pyServerError
      */
     @GetMapping("/loginWithCaptcha")
     public Res<User> loginWithCaptcha(@RequestParam("mailAddress") String mailAddress, @RequestParam("captcha") String captcha){
@@ -46,7 +44,6 @@ public class UserController {
     /**
      * @desc 发送验证码
      * @param mailAddress
-     * @return netError/mailServiceError
      */
     @GetMapping("/sendCaptcha")
     public Res<Boolean> sendCaptcha(@RequestParam("mailAddress") String mailAddress){

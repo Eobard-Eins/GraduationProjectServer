@@ -1,5 +1,6 @@
 package com.example.graduation.server.PyServer;
 
+import com.example.graduation.project.repository.TaskRequestRepository;
 import com.example.graduation.utils.Res;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class PyServerTest {
     @Autowired
     private PyServer pyServer;
+    @Autowired
+    private TaskRequestRepository taskRequestRepository;
     @Test
     void addTask() {
+        System.out.println(taskRequestRepository.deleteTaskRequestByPKidId(47));
     }
 
     @Test

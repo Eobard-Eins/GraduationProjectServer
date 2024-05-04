@@ -17,7 +17,7 @@ data class History(
      @Column(name="time", columnDefinition = "TIMESTAMP")
      var time: Date,
 
-     @Column(name="like")
+     @Column(name="`like`")
      var like: Boolean,
 
      @Column(name="dislike")
@@ -25,7 +25,9 @@ data class History(
 ){
     @Embeddable
     data class HistoryPK(
+            @Column(name = "email")
             val userId: String,
+            @Column(name = "id")
             val taskId: Long
     ) : Serializable {
         constructor() : this("", -1) {}
