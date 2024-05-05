@@ -207,9 +207,14 @@ class TaskService @Autowired constructor(
             if(history.isEmpty){
                 mp["like"]=false.toString()
                 mp["dislike"]=false.toString()
+                //添加新记录
+                historyRepository.save(History(id,email,Date(),mp["like"].toBoolean(),mp["dislike"].toBoolean()))
             }else{
                 mp["like"]=history.get().like.toString()
                 mp["dislike"]=history.get().dislike.toString()
+                //更新记录
+                history.get().time=Date()
+                historyRepository.save(history.get())
             }
             //获取接取记录 是否可被接取
             if(task.get().status==status.taskPublic){
@@ -219,8 +224,7 @@ class TaskService @Autowired constructor(
                 mp["request"]=false.toString()
             }
 
-            //添加记录
-            historyRepository.save(History(id,email,Date(),mp["like"].toBoolean(),mp["dislike"].toBoolean()))
+
 
             val res=pyServer.updatePrefer(email, id.toInt(),status.click)
             if(res.isError) throw Exception("update prefer failed(${res.message})")
