@@ -15,8 +15,8 @@ spring:
   #TODO: mail
   mail:
     host: smtp.163.com
-    username: bangboomproject@163.com
-    password: QUAOVEDKCWJPCREA
+    username: 
+    password: 
     default-encoding: UTF-8
     protocol: smtp
     properties:
@@ -35,11 +35,11 @@ spring:
 
 #TODO: OSS
 aliyun:
-  endpoint: oss-cn-shenzhen.aliyuncs.com
-  accessKeyId: LTAI5tEV7kYfDPQfo6AXVFzo
-  accessKeySecret: Rhzz3zVgYPC033gNoteZ6SGSBnB636
-  bucketName: eins-graduatin-oss
-  urlPrefix: eins-graduatin-oss.oss-cn-shenzhen.aliyuncs.com
+  endpoint: 
+  accessKeyId: 
+  accessKeySecret: 
+  bucketName: 
+  urlPrefix: 
 
 
 
